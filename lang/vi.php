@@ -1,0 +1,403 @@
+<?php
+/**
+ * Vietnamese Language File
+ * File ngôn ngữ tiếng Việt
+ */
+
+return [
+    // Navigation
+    'nav_home' => 'Trang chủ',
+    'nav_about' => 'Giới thiệu',
+    'nav_templates' => 'Mẫu giao diện',
+    'nav_services' => 'Dịch vụ',
+    'nav_products' => 'Sản phẩm',
+    'nav_reviews' => 'Đánh giá',
+    'nav_news' => 'Tin tức',
+    'nav_contact' => 'Liên hệ',
+    'nav_login' => 'Đăng nhập',
+    'nav_logout' => 'Đăng xuất',
+    'nav_register' => 'Đăng ký',
+    'nav_profile' => 'Thông tin cá nhân',
+    'nav_orders' => 'Đơn hàng của tôi',
+    'nav_admin' => 'Quản trị',
+    'nav_cart' => 'Giỏ hàng',
+    
+    // Top Bar
+    'topbar_hotline' => 'Hotline',
+    'topbar_welcome' => 'Xin chào',
+    
+    // Hero Section
+    'hero_title' => 'Thiết kế website chuyên nghiệp',
+    'hero_subtitle' => 'Tăng doanh thu bán hàng online với dịch vụ thiết kế website bán hàng giá rẻ chuẩn SEO, bắt mắt chỉ từ',
+    'hero_desc' => 'Nắm bắt cơ hội tạo nên lợi thế cạnh tranh trong thời đại 4.0. Có website sẽ giúp bạn tăng độ nhận diện thương hiệu trên mạng internet, dễ dàng chạy quảng cáo và tương tác với khách hàng trên khắp mọi miền đất nước',
+    'hero_cta' => 'Gọi ngay',
+    'hero_learn_more' => 'Tìm hiểu thêm',
+    
+    // Services Section
+    'services_title' => 'Dịch vụ của chúng tôi',
+    'services_subtitle' => 'Giải pháp toàn diện cho website của bạn',
+    
+    // Benefits Section
+    'benefits_title' => '4 lợi ích không thể phủ nhận',
+    'benefits_subtitle' => 'với chủ shop & doanh nghiệp',
+    'benefits_desc' => 'Hãy đến ngay với Thiết kế website GuGo Việt Nam Lý do đơn giản vì chúng tôi chuyên nghiệp, trách nhiệm với khách hàng từ lúc tư vấn thiết kế, lên ý tưởng, cho tới lúc bàn giao, nghiệm thu website.',
+    'benefit_1_title' => 'Tiếp cận 61% người mua hàng trên website',
+    'benefit_1_desc' => 'Mặc dù xu hướng mua hàng trên sàn TMĐT, mạng xã hội ngày càng cao, nhất là Facebook, Shopee và Lazada, nhưng khách hàng vẫn tin tưởng lựa chọn website là nơi mua sắm uy tín',
+    'benefit_2_title' => 'Xây dựng được uy tín và thương hiệu',
+    'benefit_2_desc' => 'Tạo website bán hàng với giao diện chuyên nghiệp và đẹp mắt, hỗ trợ mua sắm online tiện lợi sẽ khiến cho khách hàng yêu quý, tin tưởng hơn vào sản phẩm và thương hiệu của bạn.',
+    'benefit_3_title' => 'Tăng hiệu quả hoạt động quảng cáo',
+    'benefit_3_desc' => 'Nhờ tính ổn định và bảo mật, mọi hoạt động quảng cáo trực tuyến đều lấy website làm trung tâm. Thiết kế website chuyên nghiệp sẽ làm tăng hiệu quả SEO và chuyển đổi quảng cáo',
+    'benefit_4_title' => 'Hỗ trợ Chăm sóc khách hàng 24/7',
+    'benefit_4_desc' => 'Khách hàng có thể xem và đặt hàng bất cứ lúc nào trong ngày, và bạn có thể tư vấn cho khách hàng 24/7 ngay trên website. Từ đó, doanh thu của bạn sẽ tăng lên nhanh chóng',
+    
+    // Templates Section
+    'templates_title' => 'Mẫu giao diện theo ngành hàng',
+    'templates_subtitle' => 'Chọn mẫu phù hợp với lĩnh vực kinh doanh của bạn',
+    
+    // Categories
+    'category_doanh-nghiep' => 'Doanh nghiệp',
+    'category_ban-hang' => 'Bán hàng',
+    'category_nha-hang' => 'Nhà hàng',
+    'category_bat-dong-san' => 'Bất động sản',
+    'category_giao-duc' => 'Giáo dục',
+    'category_y-te' => 'Y tế',
+    'category_lam-dep' => 'Làm đẹp',
+    
+    // Page Title
+    'page_title' => 'Dịch vụ thiết kế website chuyên nghiệp',
+    
+    // Fallback Reviews
+    'review_fallback_1_name' => 'Nguyễn Văn A',
+    'review_fallback_1_comment' => 'Dịch vụ thiết kế website rất chuyên nghiệp, giao diện đẹp và dễ sử dụng. Nhân viên hỗ trợ nhiệt tình, tư vấn tận tâm. Rất hài lòng với dịch vụ!',
+    'review_fallback_2_name' => 'Trần Thị B',
+    'review_fallback_2_comment' => 'Website được thiết kế rất đẹp, responsive tốt trên mọi thiết bị. Giá cả hợp lý, hỗ trợ 24/7. Đặc biệt là tính năng SEO rất tốt, website lên top Google nhanh.',
+    'review_fallback_3_name' => 'Lê Văn C',
+    'review_fallback_3_comment' => 'Dịch vụ tốt, giao diện đẹp và hiện đại. Nhân viên tư vấn rất chuyên nghiệp, hỗ trợ kỹ thuật nhanh chóng. Website hoạt động ổn định, tốc độ tải nhanh.',
+    
+    // Cost Section
+    'cost_title' => 'TỐI ƯU CHI PHÍ',
+    'cost_subtitle' => 'Đầu tư thấp giá trị lâu dài',
+    'cost_desc' => 'Với doanh nghiệp mới, chi phí là điều rất đáng lo ngại. chúng tôi đã làm tốt nhiệm vụ hỗ trợ khách hàng này, không phí phát sinh, không phí hosting, mua và sử dụng, trả phí hàng năm tiện lợi!',
+    'cost_stats' => 'Theo thống kê của chúng tôi, khi sử dụng dịch vụ của chúng tôi, quý khách hàng đã tiết kiệm được hơn 20tr vnđ chi phí. Còn số này không nhỏ, đủ để bạn có 1 chiến lược Marketing hoàng tráng cùng với chúng tôi',
+    'cost_cta' => 'GỌI NGAY 0355 999 141',
+    
+    // Support Section
+    'support_title' => 'HỖ TRỢ 24/7',
+    'support_subtitle' => 'Tận tâm, chu đáo, trách nhiệm',
+    'support_desc' => 'Hệ thống hỗ trợ khách hàng với quy trình quản lý khách hàng chuyên nghiệp, đảm bảo đáp ứng 24/7 những yêu cầu của khách hàng.',
+    'support_desc2' => 'Đội ngũ kỹ thuật cũng như CSKH luôn sẵn sàng nhận yêu cầu hỗ trợ của quý khách.',
+    
+    // Reviews Section
+    'reviews_title' => 'Khách hàng nói gì về chúng tôi',
+    'reviews_subtitle' => 'Những đánh giá từ khách hàng đã sử dụng dịch vụ của chúng tôi',
+    'reviews_based_on' => 'Dựa trên',
+    'reviews_reviews' => 'đánh giá',
+    'reviews_write' => 'Viết đánh giá của bạn',
+    'reviews_rating' => 'Đánh giá của bạn',
+    'reviews_comment' => 'Nhận xét của bạn',
+    'reviews_product' => 'Sản phẩm/Dịch vụ (tùy chọn)',
+    'reviews_submit' => 'Gửi đánh giá',
+    'reviews_login_prompt' => 'Đăng nhập để viết đánh giá',
+    'reviews_login_desc' => 'Bạn cần đăng nhập hoặc tạo tài khoản mới để có thể đánh giá dịch vụ của chúng tôi.',
+    'reviews_view_more' => 'Xem thêm đánh giá',
+    'reviews_pending' => 'Đang chờ duyệt',
+    'reviews_min_chars' => 'Tối thiểu 10 ký tự',
+    'reviews_select_rating' => 'Click vào sao để chọn mức đánh giá',
+    'reviews_success' => 'Cảm ơn bạn đã đánh giá! Đánh giá của bạn đã được hiển thị và đang chờ được duyệt.',
+    'reviews_select_product' => '-- Chọn sản phẩm/dịch vụ --',
+    
+    // FAQ Section
+    'faq_title' => 'Một số câu hỏi thường gặp khi',
+    'faq_title2' => 'thiết kế web bán hàng',
+    
+    // Contact Section
+    'contact_title' => 'Liên hệ với chúng tôi',
+    'contact_subtitle' => 'Hãy để lại thông tin, chúng tôi sẽ liên hệ tư vấn miễn phí cho bạn',
+    'contact_address' => 'Địa chỉ',
+    'contact_phone' => 'Điện thoại',
+    'contact_email' => 'Email',
+    'contact_name' => 'Họ và tên',
+    'contact_phone_number' => 'Số điện thoại',
+    'contact_service' => 'Chọn gói dịch vụ',
+    'contact_message' => 'Nội dung cần tư vấn',
+    'contact_submit' => 'Gửi yêu cầu tư vấn',
+    
+    // Footer
+    'footer_about' => 'Về chúng tôi',
+    'footer_services' => 'Dịch vụ',
+    'footer_support' => 'Hỗ trợ',
+    'footer_follow' => 'Theo dõi chúng tôi',
+    'footer_copyright' => 'Bản quyền thuộc về',
+    'footer_rights' => 'Tất cả các quyền được bảo lưu.',
+    
+    // Products Section
+    'products_flash_sale' => 'FASH SALE',
+    'products_title' => 'Những mẫu giao diện đẹp đa ngành nghề',
+    'products_subtitle' => '+1000 giao diện phù hợp đa ngành nghề, giá cả cạnh tranh',
+    'products_view_detail' => 'Xem chi tiết',
+    'products_view_more' => 'XEM THÊM CÁC MẪU GIAO DIỆN',
+    'products_currency' => 'VNĐ',
+    
+    // Pricing Section
+    'pricing_title' => 'BẢNG GIÁ DỊCH VỤ THIẾT KẾ WEBSITE',
+    'pricing_subtitle' => 'Bảng giá dịch vụ thiết kế website các website cơ bản, mẫu có sẵn tại kho giao diện',
+    'pricing_basic' => 'CƠ BẢN',
+    'pricing_professional' => 'CHUYÊN NGHIỆP',
+    'pricing_premium' => 'CAO CẤP',
+    'pricing_popular' => 'PHỔ BIẾN',
+    'pricing_consult' => 'Tư vấn gói này',
+    'pricing_template' => 'Theo mẫu chọn sẵn',
+    'pricing_domain' => 'Tặng tên miền .com .net',
+    'pricing_domain_vn' => 'Tặng tên miền .com .vn',
+    'pricing_storage' => 'Dung lượng ổ đĩa tùy chọn',
+    'pricing_storage_unlimited' => 'Dung lượng không giới hạn',
+    'pricing_bandwidth' => 'Băng thông không giới hạn',
+    'pricing_language' => '1 Ngôn ngữ',
+    'pricing_languages' => 'Đa ngôn ngữ',
+    'pricing_seo' => 'Responsive, chuẩn SEO',
+    'pricing_seo_advanced' => 'Chuẩn SEO, tối ưu tốc độ',
+    'pricing_seo_expert' => 'Tối ưu SEO chuyên sâu',
+    'pricing_chat' => 'Tích hợp chat trực tuyến',
+    'pricing_content' => 'Tặng 5 bài viết - 5 sản phẩm',
+    'pricing_custom' => 'Thiết kế theo yêu cầu',
+    'pricing_exclusive' => 'Thiết kế độc quyền',
+    'pricing_server' => 'Server riêng chuyên dụng',
+    'pricing_features' => 'Tích hợp đầy đủ tính năng',
+    'pricing_marketing' => 'Hỗ trợ marketing',
+    'pricing_api' => 'Tích hợp API cao cấp',
+    'pricing_vip' => 'Hỗ trợ VIP 24/7',
+    
+    // Professional Design Section
+    'professional_title' => 'Chúng tôi giúp bạn thiết kế website chuyên nghiệp',
+    'professional_responsive' => '+1000 giao diện Responsive đẹp mắt',
+    'professional_responsive_desc' => 'Giao diện web của DiamondDev Việt Nam được đầu tư thiết kế tỉ mỉ và đa dạng, sẵn sàng đáp ứng nhu cầu làm trang web bán hàng cho hơn 30 ngành nghề khác nhau. Đặc biệt, tất cả giao diện này đều được ứng dụng công nghệ Responsive nên có thể hiển thị tối ưu trên mọi thiết bị. Dù cho khách hàng của bạn online bằng thiết bị gì, máy tính, máy tính bảng hay điện thoại di động thì website đều hiển thị đẹp mắt',
+    'professional_ssl' => 'Bảo mật tuyệt đối website với chứng chỉ SSL',
+    'professional_ssl_desc' => 'Là công ty thiết kế website chuyên nghiệp, DiamondDev Việt Nam sẽ giúp bạn cài đặt HTTPS và SSL cho website trong vòng 50s và hoàn toàn miễn phí. Nhờ vậy, website của bạn sẽ được bảo vệ bởi hàng rào bảo mật tuyệt đối HTTPS và SSL tiêu chuẩn quốc tế. Mọi thông tin khách hàng của bạn sẽ tránh được nguy cơ tấn công của virus, hacker.',
+    'professional_tablet' => 'Tích hợp Responisve trên điện thoại, tablet',
+    'professional_tablet_desc' => 'Chuẩn hiển thị trên các giao diện như Desktop, Mobile, Tablet, iPad…vv',
+    'professional_analytics' => 'Tích hợp báo cáo Google Analytics trên quản trị website',
+    'professional_analytics_desc' => 'Nhờ việc tích hợp báo cáo Google Analytics vào website DiamondDev Việt Nam, bạn có thể dễ theo dõi các thông tin như có bao nhiêu người truy cập vào website, họ truy cập vào từ máy tính hay mobile? Họ bao nhiêu tuổi ? Là nam hay nữ … ngay trên trang quản trị DiamondDev Việt Nam. Kiểm soát tốt các chỉ số trên, bạn sẽ dễ dàng đánh giá hiệu quả website đem đến cho việc kinh doanh của mình',
+    'professional_contact' => 'LIÊN HỆ NGAY',
+    
+    // SEO Section
+    'seo_question' => 'Làm sao để có đến hàng trăm đơn hàng mỗi ngày từ website?',
+    'seo_title' => 'Website thiết kế tại DiamondDev Việt Nam giúp tối ưu hiệu quả SEO và quảng cáo',
+    'seo_seo_title' => 'Thiết kế web chuẩn SEO, đưa website lên top 1 Google',
+    'seo_seo_desc' => 'Với dịch vụ thiết kế web chuyên nghiệp của DiamondDev Việt Nam, không cần phải là một chuyên gia SEO bạn vẫn có thể đưa website của mình lên top 1 Google. DiamondDev Việt Nam giúp bạn thiết kế web chuẩn SEO với cấu trúc website đã được tối ưu thân thiện với công cụ tìm kiếm. Ngoài ra, bạn có thể tùy chỉnh thẻ tiêu đề (Title), mô tả (Meta Description) và URL trong website, thêm thẻ alt của hình ảnh',
+    'seo_ads_title' => 'Tạo trang đích hiệu quả cho quảng cáo Google Adwords và Facebook Ads',
+    'seo_ads_desc' => 'Bên cạnh việc hỗ trợ quảng bá web tự nhiên thông qua SEO, tạo web bán hàng với DiamondDev Việt Nam còn mang đến cho bạn một trang đích tuyệt vời nhằm phát huy tốt nhất hiệu quả quảng cáo trả phí như Google Adwords hay Facebook Ads. Phương pháp này giúp website ngay lập tức tiếp cận đến khách hàng tiềm năng, đồng thời hỗ trợ để các chiến dịch quảng bá tự nhiên hiệu quả hơn',
+    'seo_shopping_title' => 'Đồng bộ sản phẩm với Google Shopping',
+    'seo_shopping_desc' => 'Quảng cáo Google Shopping đang ngày càng khẳng định vị thế với tỉ lệ click vào quảng cáo cao hơn 35% hình thức quảng cáo thông thường. Với DiamondDev Việt Nam, bạn có thể đồng bộ sản phẩm trên website với Google Merchant Center một cách nhanh chóng, đồng thời xem toàn bộ báo cáo ngay trên trang quản trị DiamondDev Việt Nam mà không cần đăng nhập vào hệ thống báo cáo phức tạp của Google',
+    
+    // Why Choose Us Section
+    'why_title' => 'Tại sao khách hàng đã tin tưởng và sử dụng',
+    'why_title2' => 'dịch vụ thiết kế website của chúng tôi',
+    'why_subtitle' => 'Với đội ngũ kỹ thuật và designer nhiều năm kinh nghiệm, chúng tôi sẽ giúp bạn tạo nên một website chuyên nghiệp, chất lượng',
+    'why_fast' => 'Nhanh',
+    'why_fast_desc' => 'Tiêu chí đầu tiên của một website tốt là nhanh, nhẹ, mượt, tạo sự thoải mái cho người sử dụng',
+    'why_easy' => 'Dễ sử dụng',
+    'why_easy_desc' => 'Trang quản trị dễ sử dụng, tính tùy biến linh hoạt cho phép khách hàng quản lý mọi thứ trên admin',
+    'why_cheap' => 'Chi phí rẻ',
+    'why_cheap_desc' => 'Lựa chọn đúng đơn vị thiết kế web sẽ giúp doanh nghiệp giảm được một khoản tiền đáng kể',
+    'why_beautiful' => 'Đẹp & Đẳng cấp',
+    'why_beautiful_desc' => 'Đẹp, chuyên nghiệp và đẳng cấp! Thiết kế giao diện theo phong cách hiện đại, bắt kịp xu thế',
+    'why_mobile' => 'Tương thích di động',
+    'why_mobile_desc' => 'Responsive hoàn hảo trên mọi thiết bị: điện thoại, máy tính bảng, laptop, desktop',
+    'why_warranty' => 'Bảo hành trọn đời',
+    'why_warranty_desc' => 'Hỗ trợ khách hàng 24/7 từ lúc tạo dựng sản phẩm đến quá trình vận hành. Bảo hành website trọn đời',
+    
+    // FAQ Questions
+    'faq_q1' => 'Website bán hàng là gì?',
+    'faq_a1_1' => 'Website bán hàng là cửa hàng của bạn trên internet. Nơi bạn có thể giới thiệu sản phẩm, dịch vụ của mình đến với những người có nhu cầu và họ có thể tiến hành mua hàng của bạn ngay trên website mà không cần đến cửa hàng.',
+    'faq_a1_2' => 'Vì vậy, website bán hàng của bạn cần thể hiện đầy đủ thông tin sản phẩm, dịch vụ, thông tin liên lạc cũng như các công cụ công cụ đặt hàng, thanh toán trực tuyến',
+    'faq_q2' => 'Có nên làm website bán hàng không?',
+    'faq_a2' => 'Bất cứ doanh nghiệp hay cá nhân nào đang kinh doanh cũng đều cần thiết kế website bán hàng vì website giúp quảng bá về sản phẩm hay doanh nghiệp 24/7. Bên cạnh bán hàng trên website còn giúp bạn mở rộng cơ hội tìm kiếm khách hàng, đối tác.',
+    'faq_q3' => 'Tôi không biết code thì có thể tạo website bán hàng không?',
+    'faq_a3' => 'Chắc chắn là có rồi. Với DiamondDev Việt Nam, chúng tôi sẽ hỗ trợ bạn từ A tới Z. Bạn chỉ cần lên ý tưởng, chúng tôi sẽ biến nó thành những sản phẩm thực thụ, bám sát nhất với ý tưởng của bạn.',
+    'faq_q4' => 'Giá một website bán hàng là bao nhiêu?',
+    'faq_a4' => 'Chỉ từ 2-4 triệu, bạn đã sở hữu một website bán hàng được thiết kế chuyên nghiệp, chuẩn SEO với đầy đủ tính năng bán hàng online như kết nối vận chuyển, thanh toán trực tuyến và các công cụ marketing. Đồng thời, website của bạn liên tục được cập nhật các tính năng mới mà không phải mất thêm một khoản chi phí nào.',
+    'faq_q5' => 'Thời gian để thiết kế trang web bán hàng là bao lâu?',
+    'faq_a5_1' => 'Thời gian hoàn thiện web khoảng 15 ngày. Để cho quá trình làm trang website bán hàng, web giới thiệu công ty được nhanh và thuận tiện, bạn cần chuẩn bị và cung cấp những tư liệu sau:',
+    'faq_a5_2' => '– Logo công ty, cửa hàng (nếu có)',
+    'faq_a5_3' => '– Hình ảnh sắc nét về cửa hàng/ doanh nghiệp, sản phẩm dịch vụ bạn cung cấp',
+    'faq_a5_4' => '– Tất cả các thông tin, bài viết giới thiệu về Sản phẩm, Dịch vụ, Đối tác, … mà bạn muốn đưa lên website',
+    
+    // Footer
+    'footer_about_desc' => 'Công ty chuyên cung cấp dịch vụ thiết kế website chuyên nghiệp, giá rẻ, chuẩn SEO. Cam kết mang đến sự hài lòng tối đa cho khách hàng.',
+    'footer_service_1' => 'Thiết kế website bán hàng',
+    'footer_service_2' => 'Thiết kế website công ty',
+    'footer_service_3' => 'Thiết kế website bất động sản',
+    'footer_service_4' => 'Hosting chất lượng cao',
+    'footer_service_5' => 'Dịch vụ SEO',
+    'footer_service_6' => 'Quảng cáo Google Ads',
+    'footer_contact_info' => 'THÔNG TIN LIÊN HỆ',
+    
+    // Common
+    'common_loading' => 'Đang tải...',
+    'common_save' => 'Lưu',
+    'common_cancel' => 'Hủy',
+    'common_delete' => 'Xóa',
+    'common_edit' => 'Sửa',
+    'common_view' => 'Xem',
+    'common_back' => 'Quay lại',
+    'common_next' => 'Tiếp theo',
+    'common_previous' => 'Trước',
+    'common_search' => 'Tìm kiếm',
+    'common_filter' => 'Lọc',
+    'common_all' => 'Tất cả',
+    'common_select' => 'Chọn',
+    'common_optional' => '(tùy chọn)',
+    'common_required' => '*',
+    'common_no_reviews' => 'Chưa có đánh giá nào',
+    'common_share_experience' => 'Chia sẻ trải nghiệm của bạn về dịch vụ...',
+    'common_chatbot_placeholder' => 'Nhập câu hỏi của bạn...',
+    
+    // Alt Text
+    'alt_hero_image' => 'Thiết kế website chuyên nghiệp',
+    'alt_benefits_image' => 'Thiết kế website chuyên nghiệp',
+    'alt_templates_image' => 'Mẫu giao diện theo ngành hàng',
+    
+    // Chatbot
+    'chatbot_title' => 'Tư vấn viên DiamondDev',
+    'chatbot_subtitle' => 'Chúng tôi sẵn sàng hỗ trợ bạn',
+    'chatbot_welcome' => 'Xin chào!',
+    'chatbot_intro' => 'Tôi là trợ lý tư vấn của DiamondDev Việt Nam. Tôi có thể giúp bạn:',
+    'chatbot_help_1' => 'Thông tin về dịch vụ thiết kế website',
+    'chatbot_help_2' => 'Báo giá và thời gian hoàn thành',
+    'chatbot_help_3' => 'Tư vấn tính năng website',
+    'chatbot_help_4' => 'Hỗ trợ kỹ thuật',
+    'chatbot_start' => 'Hãy đặt câu hỏi để bắt đầu nhé! 😊',
+    
+    // About Page
+    'about_title' => 'Giới thiệu',
+    'about_founder' => 'Founder & CEO',
+    'about_developer' => 'Junior Web Developer',
+    'about_intro' => 'Tôi là một Web Developer trẻ tuổi, đam mê công nghệ và luôn nỗ lực tạo ra những sản phẩm web chuyên nghiệp, hiện đại. Với nền tảng vững chắc về HTML, CSS, JavaScript, PHP và các framework hiện đại, tôi đã thành lập <strong>DiamondDev Việt Nam</strong> với mong muốn giúp các doanh nghiệp chuyển đổi số thành công.',
+    'about_location' => 'TP.HCM, Việt Nam',
+    'about_company_title' => 'Về DiamondDev Việt Nam',
+    'about_company_desc' => 'Chúng tôi là đơn vị chuyên thiết kế và phát triển website chuyên nghiệp, cam kết mang đến những giải pháp công nghệ tốt nhất cho doanh nghiệp của bạn.',
+    'about_projects' => 'Dự án hoàn thành',
+    'about_customers' => 'Khách hàng hài lòng',
+    'about_support' => 'Hỗ trợ khách hàng',
+    'about_education' => 'Học vấn',
+    'about_school' => 'Trường Đại Học Công Nghệ HUTECH',
+    'about_major' => 'Công Nghệ Thông Tin',
+    'about_skills' => 'Kỹ năng chuyên môn',
+    'about_objective' => 'Mục tiêu nghề nghiệp',
+    'about_objective_text1' => 'Tôi là một Web Developer trẻ tuổi, có động lực và chú ý đến từng chi tiết, hiện đang theo học chương trình Cử nhân Công nghệ Thông tin. Với nền tảng vững chắc về <strong>HTML, CSS, JavaScript, và PHP</strong>, tôi xuất sắc trong việc tạo ra các website responsive và thân thiện với người dùng.',
+    'about_objective_text2' => 'Tôi có kỹ năng giải quyết vấn đề mạnh mẽ và đam mê học hỏi các công nghệ mới. Tôi đang tìm kiếm một vị trí phát triển web ở cấp độ đầu vào để đóng góp và nâng cao khả năng của mình trong một môi trường chuyên nghiệp và năng động.',
+    
+    // Templates Page
+    'templates_page_title' => 'Mẫu giao diện',
+    'templates_header_title' => 'Mẫu giao diện website',
+    'templates_header_subtitle' => 'Hơn 1000+ mẫu giao diện đẹp, chuyên nghiệp cho mọi ngành nghề',
+    'templates_search_placeholder' => 'Tìm kiếm mẫu...',
+    'templates_filter_all' => 'Tất cả',
+    'templates_no_results' => 'Không tìm thấy mẫu nào',
+    
+    // Services Page
+    'services_page_title' => 'Dịch vụ',
+    'services_header_title' => 'Dịch vụ của chúng tôi',
+    'services_header_subtitle' => 'Giải pháp toàn diện cho doanh nghiệp trong kỷ nguyên số',
+    'services_webdesign' => 'Thiết kế website',
+    'services_webdesign_desc' => 'Thiết kế website chuyên nghiệp, chuẩn SEO, tương thích mọi thiết bị. Giao diện đẹp mắt, thân thiện với người dùng.',
+    'services_ecommerce' => 'Website bán hàng',
+    'services_ecommerce_desc' => 'Hệ thống bán hàng online hoàn chỉnh với giỏ hàng, thanh toán, quản lý đơn hàng và khách hàng.',
+    'services_mobile' => 'Ứng dụng di động',
+    'services_mobile_desc' => 'Phát triển ứng dụng iOS và Android cho doanh nghiệp. Tích hợp đầy đủ tính năng theo yêu cầu.',
+    'services_seo' => 'SEO - Marketing',
+    'services_seo_desc' => 'Tối ưu hóa website lên top Google, chạy quảng cáo Google Ads, Facebook Ads hiệu quả.',
+    'services_hosting' => 'Hosting - Domain',
+    'services_hosting_desc' => 'Cung cấp hosting tốc độ cao, bảo mật tốt. Hỗ trợ đăng ký và quản lý tên miền.',
+    'services_consult' => 'Tư vấn ngay',
+    'services_popular' => 'Phổ biến',
+    'services_price_from' => 'Từ',
+    
+    // Products Page
+    'products_page_title' => 'Sản phẩm',
+    'products_header_title' => 'Mẫu website chuyên nghiệp',
+    'products_header_subtitle' => 'Hơn {count}+ mẫu website đẹp, chuẩn SEO cho mọi ngành nghề',
+    'products_search_placeholder' => 'Tìm kiếm sản phẩm...',
+    'products_search_btn' => 'Tìm kiếm',
+    'products_filter_all' => 'Tất cả',
+    'products_sort_newest' => 'Mới nhất',
+    'products_sort_price_asc' => 'Giá tăng dần',
+    'products_sort_price_desc' => 'Giá giảm dần',
+    'products_sort_name' => 'Tên A-Z',
+    'products_view_detail' => 'Xem chi tiết',
+    'products_no_results' => 'Không tìm thấy sản phẩm nào',
+    
+    // Contact Page
+    'contact_page_title' => 'Liên hệ',
+    'contact_error_required' => 'Vui lòng điền đầy đủ thông tin!',
+    'contact_error_email' => 'Email không hợp lệ!',
+    'contact_success' => 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.',
+    'contact_error' => 'Có lỗi xảy ra. Vui lòng thử lại!',
+    
+    // News Page
+    'news_page_title' => 'Tin tức',
+    'news_header_title' => 'Tin tức & Blog',
+    'news_header_subtitle' => 'Cập nhật kiến thức mới nhất về thiết kế web, SEO và Digital Marketing',
+    'news_read_more' => 'Đọc thêm',
+    'news_views' => 'lượt xem',
+    'read_more' => 'Đọc thêm',
+    'views' => 'lượt xem',
+    'categories' => 'Danh mục',
+    'popular_posts' => 'Bài viết phổ biến',
+    'no_news_yet' => 'Chưa có tin tức nào',
+    
+    // Services Page - Additional
+    'services_maintenance' => 'Bảo trì - Nâng cấp',
+    'services_maintenance_desc' => 'Dịch vụ bảo trì, nâng cấp website định kỳ. Sửa lỗi, thêm tính năng mới theo yêu cầu.',
+    'services_price_month' => 'tháng',
+    'services_price_year' => 'năm',
+    
+    // Products Page - Additional
+    'products_filter' => 'Bộ lọc',
+    'products_categories' => 'Danh mục sản phẩm',
+    'products_all_products' => 'Tất cả sản phẩm',
+    'products_price_range' => 'Khoảng giá',
+    'products_price_all' => 'Tất cả',
+    'products_price_under5' => 'Dưới 5 triệu',
+    'products_price_5to10' => '5 - 10 triệu',
+    'products_price_10to20' => '10 - 20 triệu',
+    'products_price_over20' => 'Trên 20 triệu',
+    'products_need_consult' => 'Cần tư vấn?',
+    'products_consult_desc' => 'Liên hệ ngay để được hỗ trợ',
+    'products_call_now' => 'Gọi ngay',
+    'products_showing' => 'Hiển thị',
+    'products_in_total' => 'trong tổng số',
+    'products_products' => 'sản phẩm',
+    
+    // Contact Page - Additional
+    'contact_header_title' => 'Liên hệ với chúng tôi',
+    'contact_header_subtitle' => 'Hãy để chúng tôi giúp bạn hiện thực hóa ý tưởng website',
+    'contact_office_address' => 'Địa chỉ văn phòng',
+    'contact_office_location' => 'Vị trí văn phòng',
+    'contact_hotline' => 'Hotline',
+    'contact_email' => 'Email',
+    'contact_working_hours' => 'Giờ làm việc',
+    'contact_connect' => 'Kết nối với chúng tôi',
+    'contact_send_message' => 'Gửi tin nhắn cho chúng tôi',
+    'contact_monday_friday' => 'Thứ 2 - Thứ 6',
+    'contact_saturday' => 'Thứ 7',
+    'contact_sunday' => 'Chủ nhật',
+    'contact_off' => 'Nghỉ',
+    'contact_name' => 'Họ và tên',
+    'contact_phone_number' => 'Số điện thoại',
+    'contact_message' => 'Nội dung tin nhắn',
+    'contact_submit' => 'Gửi yêu cầu tư vấn',
+    'footer_about' => 'Về chúng tôi',
+    'footer_rights' => 'Tất cả quyền được bảo lưu',
+    
+    // Templates Page - Categories
+    'templates_category_business' => 'Doanh nghiệp',
+    'templates_category_ecommerce' => 'Bán hàng',
+    'templates_category_restaurant' => 'Nhà hàng',
+    'templates_category_realestate' => 'Bất động sản',
+    'templates_category_education' => 'Giáo dục',
+    'templates_category_healthcare' => 'Y tế',
+    'templates_category_beauty' => 'Làm đẹp',
+];
+?>
+

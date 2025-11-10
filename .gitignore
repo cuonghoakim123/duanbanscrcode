@@ -1,0 +1,44 @@
+# Config files với thông tin nhạy cảm
+config/config.php
+
+# Firebase credentials
+firebase-adminsdk-*.json
+
+# Database backups
+*.sql.backup
+database/backup/
+
+# File uploads
+uploads/
+assets/uploads/
+
+# Cache & temporary files
+*.cache
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*.swo
+
+# Node modules (nếu có)
+node_modules/
+package-lock.json
+
+# Composer (nếu có)
+vendor/
+composer.lock
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Backup files
+*_backup.php
+*.bak

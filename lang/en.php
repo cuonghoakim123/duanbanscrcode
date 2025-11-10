@@ -1,0 +1,403 @@
+<?php
+/**
+ * English Language File
+ * File ngôn ngữ tiếng Anh
+ */
+
+return [
+    // Navigation
+    'nav_home' => 'Home',
+    'nav_about' => 'About',
+    'nav_templates' => 'Templates',
+    'nav_services' => 'Services',
+    'nav_products' => 'Products',
+    'nav_reviews' => 'Reviews',
+    'nav_news' => 'News',
+    'nav_contact' => 'Contact',
+    'nav_login' => 'Login',
+    'nav_logout' => 'Logout',
+    'nav_register' => 'Register',
+    'nav_profile' => 'Profile',
+    'nav_orders' => 'My Orders',
+    'nav_admin' => 'Admin',
+    'nav_cart' => 'Cart',
+    
+    // Top Bar
+    'topbar_hotline' => 'Hotline',
+    'topbar_welcome' => 'Welcome',
+    
+    // Hero Section
+    'hero_title' => 'Professional Website Design',
+    'hero_subtitle' => 'Increase online sales revenue with cheap SEO-standard e-commerce website design service, eye-catching from only',
+    'hero_desc' => 'Seize the opportunity to create a competitive advantage in the 4.0 era. Having a website will help you increase brand recognition on the internet, easily run ads and interact with customers across the country',
+    'hero_cta' => 'Call now',
+    'hero_learn_more' => 'Learn More',
+    
+    // Services Section
+    'services_title' => 'Our Services',
+    'services_subtitle' => 'Comprehensive solutions for your website',
+    
+    // Benefits Section
+    'benefits_title' => '4 undeniable benefits',
+    'benefits_subtitle' => 'for shop owners & businesses',
+    'benefits_desc' => 'Come to GuGo Vietnam Website Design right away. The simple reason is that we are professional, responsible to customers from design consulting, idea generation, to handover and website acceptance.',
+    'benefit_1_title' => 'Reach 61% of online shoppers',
+    'benefit_1_desc' => 'Although the trend of shopping on e-commerce platforms and social networks is increasing, especially Facebook, Shopee and Lazada, customers still trust and choose websites as a reliable shopping place',
+    'benefit_2_title' => 'Build credibility and brand',
+    'benefit_2_desc' => 'Creating an e-commerce website with a professional and beautiful interface, supporting convenient online shopping will make customers love and trust your products and brand more.',
+    'benefit_3_title' => 'Increase advertising effectiveness',
+    'benefit_3_desc' => 'Thanks to stability and security, all online advertising activities take the website as the center. Professional website design will increase SEO effectiveness and advertising conversion',
+    'benefit_4_title' => '24/7 Customer Support',
+    'benefit_4_desc' => 'Customers can view and order at any time of the day, and you can consult customers 24/7 right on the website. From there, your revenue will increase rapidly',
+    
+    // Templates Section
+    'templates_title' => 'Templates by Industry',
+    'templates_subtitle' => 'Choose a template that suits your business field',
+    
+    // Categories
+    'category_doanh-nghiep' => 'Business',
+    'category_ban-hang' => 'E-commerce',
+    'category_nha-hang' => 'Restaurant',
+    'category_bat-dong-san' => 'Real Estate',
+    'category_giao-duc' => 'Education',
+    'category_y-te' => 'Healthcare',
+    'category_lam-dep' => 'Beauty',
+    
+    // Page Title
+    'page_title' => 'Professional Website Design Services',
+    
+    // Fallback Reviews
+    'review_fallback_1_name' => 'Nguyen Van A',
+    'review_fallback_1_comment' => 'The website design service is very professional, beautiful interface and easy to use. Staff support is enthusiastic and dedicated. Very satisfied with the service!',
+    'review_fallback_2_name' => 'Tran Thi B',
+    'review_fallback_2_comment' => 'The website is beautifully designed, responsive well on all devices. Reasonable price, 24/7 support. Especially the SEO feature is very good, the website quickly ranks on Google.',
+    'review_fallback_3_name' => 'Le Van C',
+    'review_fallback_3_comment' => 'Good service, beautiful and modern interface. Staff consultants are very professional, technical support is quick. The website operates stably, fast loading speed.',
+    
+    // Cost Section
+    'cost_title' => 'COST OPTIMIZATION',
+    'cost_subtitle' => 'Low investment, long-term value',
+    'cost_desc' => 'For new businesses, cost is a major concern. We have done a good job of supporting customers in this regard, no additional fees, no hosting fees, buy and use, convenient annual payment!',
+    'cost_stats' => 'According to our statistics, when using our services, our customers have saved more than 20 million VND in costs. This number is not small, enough for you to have a magnificent Marketing strategy with us',
+    'cost_cta' => 'CALL NOW 0355 999 141',
+    
+    // Support Section
+    'support_title' => '24/7 SUPPORT',
+    'support_subtitle' => 'Dedicated, thoughtful, responsible',
+    'support_desc' => 'Customer support system with professional customer management process, ensuring 24/7 response to customer requirements.',
+    'support_desc2' => 'The technical team as well as customer service are always ready to receive your support requests.',
+    
+    // Reviews Section
+    'reviews_title' => 'What our customers say about us',
+    'reviews_subtitle' => 'Reviews from customers who have used our services',
+    'reviews_based_on' => 'Based on',
+    'reviews_reviews' => 'reviews',
+    'reviews_write' => 'Write your review',
+    'reviews_rating' => 'Your rating',
+    'reviews_comment' => 'Your comment',
+    'reviews_product' => 'Product/Service (optional)',
+    'reviews_submit' => 'Submit review',
+    'reviews_login_prompt' => 'Login to write a review',
+    'reviews_login_desc' => 'You need to login or create a new account to review our services.',
+    'reviews_view_more' => 'View more reviews',
+    'reviews_pending' => 'Pending approval',
+    'reviews_min_chars' => 'Minimum 10 characters',
+    'reviews_select_rating' => 'Click on a star to select rating',
+    'reviews_success' => 'Thank you for your review! Your review has been displayed and is pending approval.',
+    'reviews_select_product' => '-- Select product/service --',
+    
+    // FAQ Section
+    'faq_title' => 'Some frequently asked questions when',
+    'faq_title2' => 'designing an e-commerce website',
+    
+    // Contact Section
+    'contact_title' => 'Contact us',
+    'contact_subtitle' => 'Leave your information, we will contact you for free consultation',
+    'contact_address' => 'Address',
+    'contact_phone' => 'Phone',
+    'contact_email' => 'Email',
+    'contact_name' => 'Full name',
+    'contact_phone_number' => 'Phone number',
+    'contact_service' => 'Select service package',
+    'contact_message' => 'Consultation content',
+    'contact_submit' => 'Send consultation request',
+    
+    // Footer
+    'footer_about' => 'About us',
+    'footer_services' => 'Services',
+    'footer_support' => 'Support',
+    'footer_follow' => 'Follow us',
+    'footer_copyright' => 'Copyright belongs to',
+    'footer_rights' => 'All rights reserved.',
+    
+    // Products Section
+    'products_flash_sale' => 'FLASH SALE',
+    'products_title' => 'Beautiful multi-industry website templates',
+    'products_subtitle' => '+1000 templates suitable for various industries, competitive prices',
+    'products_view_detail' => 'View details',
+    'products_view_more' => 'VIEW MORE TEMPLATES',
+    'products_currency' => 'VND',
+    
+    // Pricing Section
+    'pricing_title' => 'WEBSITE DESIGN SERVICE PRICING',
+    'pricing_subtitle' => 'Pricing for basic website design services, templates available in the template library',
+    'pricing_basic' => 'BASIC',
+    'pricing_professional' => 'PROFESSIONAL',
+    'pricing_premium' => 'PREMIUM',
+    'pricing_popular' => 'POPULAR',
+    'pricing_consult' => 'Consult this package',
+    'pricing_template' => 'Pre-selected template',
+    'pricing_domain' => 'Free .com .net domain',
+    'pricing_domain_vn' => 'Free .com .vn domain',
+    'pricing_storage' => 'Optional disk storage',
+    'pricing_storage_unlimited' => 'Unlimited storage',
+    'pricing_bandwidth' => 'Unlimited bandwidth',
+    'pricing_language' => '1 Language',
+    'pricing_languages' => 'Multi-language',
+    'pricing_seo' => 'Responsive, SEO standard',
+    'pricing_seo_advanced' => 'SEO standard, speed optimized',
+    'pricing_seo_expert' => 'Expert SEO optimization',
+    'pricing_chat' => 'Online chat integration',
+    'pricing_content' => 'Free 5 articles - 5 products',
+    'pricing_custom' => 'Custom design',
+    'pricing_exclusive' => 'Exclusive design',
+    'pricing_server' => 'Dedicated server',
+    'pricing_features' => 'Full feature integration',
+    'pricing_marketing' => 'Marketing support',
+    'pricing_api' => 'Advanced API integration',
+    'pricing_vip' => 'VIP 24/7 support',
+    
+    // Professional Design Section
+    'professional_title' => 'We help you design professional websites',
+    'professional_responsive' => '+1000 beautiful Responsive templates',
+    'professional_responsive_desc' => 'DiamondDev Vietnam\'s web interfaces are meticulously and diversely designed, ready to meet the needs of creating e-commerce websites for more than 30 different industries. In particular, all these interfaces apply Responsive technology so they can be optimally displayed on all devices. No matter what device your customers use online - computers, tablets or mobile phones - the website displays beautifully',
+    'professional_ssl' => 'Absolute website security with SSL certificate',
+    'professional_ssl_desc' => 'As a professional website design company, DiamondDev Vietnam will help you install HTTPS and SSL for your website in just 50 seconds and completely free. As a result, your website will be protected by absolute HTTPS and international standard SSL security barriers. All your customer information will be protected from virus and hacker attacks.',
+    'professional_tablet' => 'Responsive integration on phones, tablets',
+    'professional_tablet_desc' => 'Standard display on interfaces such as Desktop, Mobile, Tablet, iPad, etc.',
+    'professional_analytics' => 'Google Analytics report integration on website administration',
+    'professional_analytics_desc' => 'Thanks to integrating Google Analytics reports into DiamondDev Vietnam website, you can easily track information such as how many people visit the website, do they access from computers or mobile? How old are they? Are they male or female... right on the DiamondDev Vietnam administration page. By controlling these indicators well, you will easily evaluate the effectiveness that the website brings to your business',
+    'professional_contact' => 'CONTACT US NOW',
+    
+    // SEO Section
+    'seo_question' => 'How to get hundreds of orders per day from the website?',
+    'seo_title' => 'Websites designed at DiamondDev Vietnam help optimize SEO and advertising effectiveness',
+    'seo_seo_title' => 'SEO-standard web design, bring website to top 1 Google',
+    'seo_seo_desc' => 'With DiamondDev Vietnam\'s professional web design service, you don\'t need to be an SEO expert to get your website to the top 1 on Google. DiamondDev Vietnam helps you design SEO-standard websites with a website structure optimized for search engines. In addition, you can customize the title tag (Title), description (Meta Description) and URL in the website, add alt tags for images',
+    'seo_ads_title' => 'Create effective landing pages for Google Adwords and Facebook Ads',
+    'seo_ads_desc' => 'In addition to supporting natural web promotion through SEO, creating an e-commerce website with DiamondDev Vietnam also gives you a great landing page to maximize the effectiveness of paid advertising such as Google Adwords or Facebook Ads. This method helps the website immediately reach potential customers, while supporting more effective natural promotion campaigns',
+    'seo_shopping_title' => 'Synchronize products with Google Shopping',
+    'seo_shopping_desc' => 'Google Shopping advertising is increasingly asserting its position with a click-through rate 35% higher than conventional advertising formats. With DiamondDev Vietnam, you can quickly synchronize products on your website with Google Merchant Center, and view all reports right on the DiamondDev Vietnam administration page without having to log into Google\'s complex reporting system',
+    
+    // Why Choose Us Section
+    'why_title' => 'Why customers trust and use',
+    'why_title2' => 'our website design service',
+    'why_subtitle' => 'With a team of experienced technicians and designers, we will help you create a professional, quality website',
+    'why_fast' => 'Fast',
+    'why_fast_desc' => 'The first criterion of a good website is fast, light, smooth, creating comfort for users',
+    'why_easy' => 'Easy to use',
+    'why_easy_desc' => 'Easy-to-use administration page, flexible customization allows customers to manage everything on admin',
+    'why_cheap' => 'Cheap cost',
+    'why_cheap_desc' => 'Choosing the right web design unit will help businesses save a significant amount of money',
+    'why_beautiful' => 'Beautiful & Classy',
+    'why_beautiful_desc' => 'Beautiful, professional and classy! Interface design in modern style, keeping up with trends',
+    'why_mobile' => 'Mobile compatible',
+    'why_mobile_desc' => 'Perfect responsive on all devices: phones, tablets, laptops, desktops',
+    'why_warranty' => 'Lifetime warranty',
+    'why_warranty_desc' => '24/7 customer support from product creation to operation process. Lifetime website warranty',
+    
+    // FAQ Questions
+    'faq_q1' => 'What is an e-commerce website?',
+    'faq_a1_1' => 'An e-commerce website is your store on the internet. Where you can introduce your products and services to people in need and they can purchase from you right on the website without going to the store.',
+    'faq_a1_2' => 'Therefore, your e-commerce website needs to fully display product information, services, contact information as well as ordering and online payment tools',
+    'faq_q2' => 'Should I create an e-commerce website?',
+    'faq_a2' => 'Any business or individual doing business needs to design an e-commerce website because the website helps promote products or businesses 24/7. In addition to selling on the website, it also helps you expand opportunities to find customers and partners.',
+    'faq_q3' => 'I don\'t know code, can I create an e-commerce website?',
+    'faq_a3' => 'Absolutely yes. With DiamondDev Vietnam, we will support you from A to Z. You just need to come up with ideas, we will turn them into real products, closest to your ideas.',
+    'faq_q4' => 'How much does an e-commerce website cost?',
+    'faq_a4' => 'From only 2-4 million, you already own a professionally designed, SEO-standard e-commerce website with full online sales features such as shipping connections, online payments and marketing tools. At the same time, your website is continuously updated with new features without any additional costs.',
+    'faq_q5' => 'How long does it take to design an e-commerce website?',
+    'faq_a5_1' => 'Website completion time is about 15 days. To make the process of creating an e-commerce website and company introduction website fast and convenient, you need to prepare and provide the following materials:',
+    'faq_a5_2' => '– Company logo, store (if any)',
+    'faq_a5_3' => '– Sharp images of the store/company, products and services you provide',
+    'faq_a5_4' => '– All information, articles introducing Products, Services, Partners, … that you want to put on the website',
+    
+    // Footer
+    'footer_about_desc' => 'Company specializing in providing professional, cheap, SEO-standard website design services. Committed to bringing maximum satisfaction to customers.',
+    'footer_service_1' => 'E-commerce website design',
+    'footer_service_2' => 'Corporate website design',
+    'footer_service_3' => 'Real estate website design',
+    'footer_service_4' => 'High quality hosting',
+    'footer_service_5' => 'SEO services',
+    'footer_service_6' => 'Google Ads advertising',
+    'footer_contact_info' => 'CONTACT INFO',
+    
+    // Common
+    'common_loading' => 'Loading...',
+    'common_save' => 'Save',
+    'common_cancel' => 'Cancel',
+    'common_delete' => 'Delete',
+    'common_edit' => 'Edit',
+    'common_view' => 'View',
+    'common_back' => 'Back',
+    'common_next' => 'Next',
+    'common_previous' => 'Previous',
+    'common_search' => 'Search',
+    'common_filter' => 'Filter',
+    'common_all' => 'All',
+    'common_select' => 'Select',
+    'common_optional' => '(optional)',
+    'common_required' => '*',
+    'common_no_reviews' => 'No reviews yet',
+    'common_share_experience' => 'Share your experience about our service...',
+    'common_chatbot_placeholder' => 'Enter your question...',
+    
+    // Alt Text
+    'alt_hero_image' => 'Professional website design',
+    'alt_benefits_image' => 'Professional website design',
+    'alt_templates_image' => 'Templates by industry',
+    
+    // Chatbot
+    'chatbot_title' => 'DiamondDev Consultant',
+    'chatbot_subtitle' => 'We are ready to support you',
+    'chatbot_welcome' => 'Hello!',
+    'chatbot_intro' => 'I am DiamondDev Vietnam\'s consulting assistant. I can help you with:',
+    'chatbot_help_1' => 'Information about website design services',
+    'chatbot_help_2' => 'Pricing and completion time',
+    'chatbot_help_3' => 'Website feature consultation',
+    'chatbot_help_4' => 'Technical support',
+    'chatbot_start' => 'Please ask a question to get started! 😊',
+    
+    // About Page
+    'about_title' => 'About',
+    'about_founder' => 'Founder & CEO',
+    'about_developer' => 'Junior Web Developer',
+    'about_intro' => 'I am a young Web Developer, passionate about technology and always striving to create professional, modern web products. With a solid foundation in HTML, CSS, JavaScript, PHP and modern frameworks, I founded <strong>DiamondDev Vietnam</strong> with the desire to help businesses successfully digitalize.',
+    'about_location' => 'Ho Chi Minh City, Vietnam',
+    'about_company_title' => 'About DiamondDev Vietnam',
+    'about_company_desc' => 'We are a professional website design and development unit, committed to bringing the best technology solutions for your business.',
+    'about_projects' => 'Completed projects',
+    'about_customers' => 'Satisfied customers',
+    'about_support' => 'Customer support',
+    'about_education' => 'Education',
+    'about_school' => 'HUTECH University of Technology',
+    'about_major' => 'Information Technology',
+    'about_skills' => 'Professional skills',
+    'about_objective' => 'Career objective',
+    'about_objective_text1' => 'I am a young, motivated and detail-oriented Web Developer, currently pursuing a Bachelor\'s degree in Information Technology. With a solid foundation in <strong>HTML, CSS, JavaScript, and PHP</strong>, I excel at creating responsive and user-friendly websites.',
+    'about_objective_text2' => 'I have strong problem-solving skills and a passion for learning new technologies. I am seeking an entry-level web development position to contribute and enhance my abilities in a professional and dynamic environment.',
+    
+    // Templates Page
+    'templates_page_title' => 'Templates',
+    'templates_header_title' => 'Website templates',
+    'templates_header_subtitle' => 'Over 1000+ beautiful, professional templates for all industries',
+    'templates_search_placeholder' => 'Search templates...',
+    'templates_filter_all' => 'All',
+    'templates_no_results' => 'No templates found',
+    
+    // Services Page
+    'services_page_title' => 'Services',
+    'services_header_title' => 'Our services',
+    'services_header_subtitle' => 'Comprehensive solutions for businesses in the digital age',
+    'services_webdesign' => 'Website design',
+    'services_webdesign_desc' => 'Professional website design, SEO-standard, compatible with all devices. Beautiful interface, user-friendly.',
+    'services_ecommerce' => 'E-commerce website',
+    'services_ecommerce_desc' => 'Complete online sales system with shopping cart, payment, order and customer management.',
+    'services_mobile' => 'Mobile application',
+    'services_mobile_desc' => 'Develop iOS and Android applications for businesses. Full feature integration as required.',
+    'services_seo' => 'SEO - Marketing',
+    'services_seo_desc' => 'Optimize website to top Google, run Google Ads, Facebook Ads effectively.',
+    'services_hosting' => 'Hosting - Domain',
+    'services_hosting_desc' => 'Provide high-speed hosting, good security. Support domain registration and management.',
+    'services_consult' => 'Consult now',
+    'services_popular' => 'Popular',
+    'services_price_from' => 'From',
+    
+    // Products Page
+    'products_page_title' => 'Products',
+    'products_header_title' => 'Professional website templates',
+    'products_header_subtitle' => 'Over {count}+ beautiful, SEO-standard website templates for all industries',
+    'products_search_placeholder' => 'Search products...',
+    'products_search_btn' => 'Search',
+    'products_filter_all' => 'All',
+    'products_sort_newest' => 'Newest',
+    'products_sort_price_asc' => 'Price: Low to High',
+    'products_sort_price_desc' => 'Price: High to Low',
+    'products_sort_name' => 'Name A-Z',
+    'products_view_detail' => 'View details',
+    'products_no_results' => 'No products found',
+    
+    // Contact Page
+    'contact_page_title' => 'Contact',
+    'contact_error_required' => 'Please fill in all required fields!',
+    'contact_error_email' => 'Invalid email!',
+    'contact_success' => 'Thank you for contacting us! We will respond as soon as possible.',
+    'contact_error' => 'An error occurred. Please try again!',
+    
+    // News Page
+    'news_page_title' => 'News',
+    'news_header_title' => 'News & Blog',
+    'news_header_subtitle' => 'Latest knowledge updates on web design, SEO and Digital Marketing',
+    'news_read_more' => 'Read more',
+    'news_views' => 'views',
+    'read_more' => 'Read more',
+    'views' => 'views',
+    'categories' => 'Categories',
+    'popular_posts' => 'Popular Posts',
+    'no_news_yet' => 'No news yet',
+    
+    // Services Page - Additional
+    'services_maintenance' => 'Maintenance - Upgrade',
+    'services_maintenance_desc' => 'Regular website maintenance and upgrade services. Fix errors, add new features as required.',
+    'services_price_month' => 'month',
+    'services_price_year' => 'year',
+    
+    // Products Page - Additional
+    'products_filter' => 'Filter',
+    'products_categories' => 'Product categories',
+    'products_all_products' => 'All products',
+    'products_price_range' => 'Price range',
+    'products_price_all' => 'All',
+    'products_price_under5' => 'Under 5 million',
+    'products_price_5to10' => '5 - 10 million',
+    'products_price_10to20' => '10 - 20 million',
+    'products_price_over20' => 'Over 20 million',
+    'products_need_consult' => 'Need consultation?',
+    'products_consult_desc' => 'Contact us now for support',
+    'products_call_now' => 'Call now',
+    'products_showing' => 'Showing',
+    'products_in_total' => 'of',
+    'products_products' => 'products',
+    
+    // Contact Page - Additional
+    'contact_header_title' => 'Contact us',
+    'contact_header_subtitle' => 'Let us help you realize your website idea',
+    'contact_office_address' => 'Office address',
+    'contact_office_location' => 'Office location',
+    'contact_hotline' => 'Hotline',
+    'contact_email' => 'Email',
+    'contact_working_hours' => 'Working hours',
+    'contact_connect' => 'Connect with us',
+    'contact_send_message' => 'Send us a message',
+    'contact_monday_friday' => 'Monday - Friday',
+    'contact_saturday' => 'Saturday',
+    'contact_sunday' => 'Sunday',
+    'contact_off' => 'Closed',
+    'contact_name' => 'Full name',
+    'contact_phone_number' => 'Phone number',
+    'contact_message' => 'Message content',
+    'contact_submit' => 'Send consultation request',
+    'footer_about' => 'About us',
+    'footer_rights' => 'All rights reserved',
+    
+    // Templates Page - Categories
+    'templates_category_business' => 'Business',
+    'templates_category_ecommerce' => 'E-commerce',
+    'templates_category_restaurant' => 'Restaurant',
+    'templates_category_realestate' => 'Real Estate',
+    'templates_category_education' => 'Education',
+    'templates_category_healthcare' => 'Healthcare',
+    'templates_category_beauty' => 'Beauty',
+];
+?>
+
