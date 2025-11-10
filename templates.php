@@ -128,17 +128,8 @@ include 'includes/header.php';
                         </div>
                     <?php endif; ?>
                     <div class="template-overlay">
-                        <?php if ($template['demo_url']): ?>
-                            <a href="<?php echo htmlspecialchars($template['demo_url']); ?>" target="_blank" class="btn btn-light btn-sm me-2">
-                                <i class="fas fa-eye"></i> Xem demo
-                            </a>
-                        <?php else: ?>
-                            <a href="#" class="btn btn-light btn-sm me-2" data-bs-toggle="modal" data-bs-target="#previewModal<?php echo $template['id'] ?? ''; ?>">
-                                <i class="fas fa-eye"></i> Xem demo
-                            </a>
-                        <?php endif; ?>
-                        <a href="<?php echo SITE_URL; ?>/products.php" class="btn btn-primary btn-sm">
-                            <i class="fas fa-shopping-cart"></i> Đặt hàng
+                        <a href="#" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#templateDetailModal<?php echo $template['id'] ?? uniqid(); ?>">
+                            <i class="fas fa-eye"></i> Xem chi tiết
                         </a>
                     </div>
                 </div>
@@ -169,42 +160,130 @@ include 'includes/header.php';
             </div>
         </div>
         
-        <!-- Preview Modal -->
-        <?php if (!$template['demo_url']): ?>
-        <div class="modal fade" id="previewModal<?php echo $template['id'] ?? ''; ?>" tabindex="-1">
-            <div class="modal-dialog modal-xl">
+        <!-- Template Detail Modal -->
+        <div class="modal fade" id="templateDetailModal<?php echo $template['id'] ?? uniqid(); ?>" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Xem trước: <?php echo htmlspecialchars($template['name']); ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-palette"></i> <?php echo htmlspecialchars($template['name']); ?>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body p-0">
-                        <div class="ratio ratio-16x9">
-                            <div class="d-flex align-items-center justify-content-center bg-light">
-                                <div class="text-center">
-                                    <?php if ($template['image']): ?>
-                                        <?php 
-                                        // Kiểm tra nếu là URL đầy đủ hoặc chỉ là tên file
-                                        $image_url = $template['image'];
-                                        if (!preg_match('/^https?:\/\//', $image_url) && !preg_match('/^\//', $image_url)) {
-                                            $image_url = SITE_URL . '/uploads/templates/' . $image_url;
-                                        }
-                                        ?>
-                                        <img src="<?php echo htmlspecialchars($image_url); ?>" 
-                                             alt="<?php echo htmlspecialchars($template['name']); ?>"
-                                             class="img-fluid">
-                                    <?php else: ?>
-                                        <i class="fas fa-desktop fa-5x text-muted mb-3"></i>
-                                        <p class="text-muted">Demo preview sẽ được hiển thị tại đây</p>
-                                    <?php endif; ?>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <?php if ($template['image']): ?>
+                                    <?php 
+                                    // Kiểm tra nếu là URL đầy đủ hoặc chỉ là tên file
+                                    $image_url = $template['image'];
+                                    if (!preg_match('/^https?:\/\//', $image_url) && !preg_match('/^\//', $image_url)) {
+                                        $image_url = SITE_URL . '/uploads/templates/' . $image_url;
+                                    }
+                                    ?>
+                                    <img src="<?php echo htmlspecialchars($image_url); ?>" 
+                                         alt="<?php echo htmlspecialchars($template['name']); ?>"
+                                         class="img-fluid rounded shadow">
+                                <?php else: ?>
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                                        <div class="text-center">
+                                            <i class="fas fa-desktop fa-5x text-muted mb-3"></i>
+                                            <p class="text-muted">Hình ảnh mẫu giao diện</p>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if ($template['demo_url']): ?>
+                                    <div class="mt-3">
+                                        <a href="<?php echo htmlspecialchars($template['demo_url']); ?>" 
+                                           target="_blank" 
+                                           class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-external-link-alt"></i> Xem demo trực tiếp
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h4 class="mb-3"><?php echo htmlspecialchars($template['name']); ?></h4>
+                                
+                                <?php if ($template['description']): ?>
+                                    <div class="mb-4">
+                                        <h6><i class="fas fa-info-circle text-primary"></i> Mô tả</h6>
+                                        <p><?php echo nl2br(htmlspecialchars($template['description'])); ?></p>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <div class="mb-4">
+                                    <h6><i class="fas fa-tag text-primary"></i> Danh mục</h6>
+                                    <span class="badge bg-info"><?php echo htmlspecialchars($template['category'] ?? 'Khác'); ?></span>
                                 </div>
+                                
+                                <div class="mb-4">
+                                    <h6><i class="fas fa-star text-primary"></i> Đánh giá</h6>
+                                    <div class="mb-2">
+                                        <?php 
+                                        $rating = $template['rating'] ?? 5.0;
+                                        for($i = 1; $i <= 5; $i++): 
+                                        ?>
+                                            <i class="fas fa-star <?php echo $i <= $rating ? 'text-warning' : 'text-muted'; ?>" style="font-size: 20px;"></i>
+                                        <?php endfor; ?>
+                                        <span class="ms-2 fw-bold"><?php echo number_format($rating, 1); ?>/5.0</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h6><i class="fas fa-dollar-sign text-primary"></i> Giá</h6>
+                                    <div>
+                                        <?php if ($template['sale_price']): ?>
+                                            <span class="text-decoration-line-through text-muted fs-5"><?php echo number_format($template['price']); ?>đ</span>
+                                            <span class="text-danger fw-bold fs-4 ms-2"><?php echo number_format($template['sale_price']); ?>đ</span>
+                                            <?php 
+                                            $discount = round((($template['price'] - $template['sale_price']) / $template['price']) * 100);
+                                            ?>
+                                            <span class="badge bg-danger ms-2">-<?php echo $discount; ?>%</span>
+                                        <?php else: ?>
+                                            <span class="text-primary fw-bold fs-4"><?php echo number_format($template['price']); ?>đ</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <?php if ($template['features']): ?>
+                                    <div class="mb-4">
+                                        <h6><i class="fas fa-check-circle text-primary"></i> Tính năng</h6>
+                                        <ul class="list-unstyled">
+                                            <?php 
+                                            $features = explode("\n", $template['features']);
+                                            foreach ($features as $feature): 
+                                                $feature = trim($feature);
+                                                if (!empty($feature)):
+                                            ?>
+                                                <li class="mb-2">
+                                                    <i class="fas fa-check text-success me-2"></i>
+                                                    <?php echo htmlspecialchars($feature); ?>
+                                                </li>
+                                            <?php 
+                                                endif;
+                                            endforeach; 
+                                            ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Đóng
+                        </button>
+                        <a href="<?php echo SITE_URL; ?>/contact.php?template=<?php echo urlencode($template['name']); ?>&template_id=<?php echo $template['id'] ?? ''; ?>" 
+                           class="btn btn-primary btn-lg">
+                            <i class="fas fa-phone-alt"></i> Liên hệ tư vấn ngay
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        <?php endif; ?>
         
         <?php 
             endforeach;
@@ -224,27 +303,6 @@ include 'includes/header.php';
     </section>
 </div>
 
-<!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Xem trước mẫu giao diện</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div class="ratio ratio-16x9">
-                    <div class="d-flex align-items-center justify-content-center bg-light">
-                        <div class="text-center">
-                            <i class="fas fa-desktop fa-5x text-muted mb-3"></i>
-                            <p class="text-muted">Demo preview sẽ được hiển thị tại đây</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <style>
 .bg-gradient-primary {

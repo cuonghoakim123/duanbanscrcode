@@ -86,7 +86,26 @@ if (!function_exists('lang')) {
                         <li class="nav-item">
                             <a class="nav-link position-relative" href="<?php echo SITE_URL; ?>/cart.php">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" id="cart-count">0</span>
+                                <?php 
+                                // Lấy số lượng giỏ hàng từ database
+                                $cart_count = 0;
+                                if (isset($_SESSION['user_id'])) {
+                                    require_once __DIR__ . '/../config/database.php';
+                                    $database = new Database();
+                                    $db = $database->getConnection();
+                                    $count_query = "SELECT SUM(quantity) as total FROM carts WHERE user_id = :user_id";
+                                    $count_stmt = $db->prepare($count_query);
+                                    $count_stmt->bindParam(':user_id', $_SESSION['user_id']);
+                                    $count_stmt->execute();
+                                    $count_result = $count_stmt->fetch(PDO::FETCH_ASSOC);
+                                    $cart_count = (int)($count_result['total'] ?? 0);
+                                }
+                                ?>
+                                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" 
+                                      id="cart-count" 
+                                      style="<?php echo $cart_count > 0 ? '' : 'display: none;'; ?>">
+                                    <?php echo $cart_count; ?>
+                                </span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">

@@ -8,12 +8,29 @@ include 'includes/header.php';
 $success = '';
 $error = '';
 
+// Lấy thông tin template từ URL nếu có
+$template_name = isset($_GET['template']) ? urldecode($_GET['template']) : '';
+$template_id = isset($_GET['template_id']) ? (int)$_GET['template_id'] : 0;
+$auto_fill_subject = '';
+$auto_fill_message = '';
+
+if ($template_name) {
+    $auto_fill_subject = 'Tư vấn mẫu giao diện: ' . $template_name;
+    $auto_fill_message = "Xin chào,\n\nTôi quan tâm đến mẫu giao diện: " . $template_name . "\n\nVui lòng liên hệ với tôi để tư vấn chi tiết.\n\nCảm ơn!";
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $subject = trim($_POST['subject'] ?? '');
     $message = trim($_POST['message'] ?? '');
+    $template_id = isset($_POST['template_id']) ? (int)$_POST['template_id'] : 0;
+    
+    // Nếu có template_id, thêm thông tin vào message
+    if ($template_id && $template_name) {
+        $message = "Mẫu giao diện quan tâm: " . $template_name . "\n\n" . $message;
+    }
     
     if (empty($name) || empty($email) || empty($phone) || empty($message)) {
         $error = lang('contact_error_required');
@@ -139,18 +156,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <form method="POST" action="">
                     <div class="row g-3">
+                        <?php if ($template_name): ?>
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>Bạn đang quan tâm đến:</strong> <?php echo htmlspecialchars($template_name); ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
                         <div class="col-md-6">
                             <label class="form-label"><?php echo lang('contact_name'); ?> <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" name="name" class="form-control" placeholder="<?php echo $lang == 'vi' ? 'Nguyễn Văn A' : 'John Doe'; ?>" required value="<?php echo $_POST['name'] ?? ''; ?>">
+                                <input type="text" name="name" class="form-control" placeholder="<?php echo $lang == 'vi' ? 'Nguyễn Văn A' : 'John Doe'; ?>" required value="<?php echo $_POST['name'] ?? (isset($_SESSION['user_name']) ? $_SESSION['user_name'] : ''); ?>">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label"><?php echo lang('contact_email'); ?> <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="email@example.com" required value="<?php echo $_POST['email'] ?? ''; ?>">
+                                <input type="email" name="email" class="form-control" placeholder="email@example.com" required value="<?php echo $_POST['email'] ?? (isset($_SESSION['user_email']) ? $_SESSION['user_email'] : ''); ?>">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -164,21 +190,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <label class="form-label"><?php echo $lang == 'vi' ? 'Chủ đề' : 'Subject'; ?></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                <select name="subject" class="form-select">
-                                    <option value=""><?php echo $lang == 'vi' ? 'Chọn chủ đề' : 'Select subject'; ?></option>
-                                    <option value="design"><?php echo lang('services_webdesign'); ?></option>
-                                    <option value="ecommerce"><?php echo lang('services_ecommerce'); ?></option>
-                                    <option value="seo"><?php echo lang('services_seo'); ?></option>
-                                    <option value="app"><?php echo lang('services_mobile'); ?></option>
-                                    <option value="support"><?php echo $lang == 'vi' ? 'Hỗ trợ kỹ thuật' : 'Technical support'; ?></option>
-                                    <option value="other"><?php echo $lang == 'vi' ? 'Khác' : 'Other'; ?></option>
-                                </select>
+                                <input type="text" name="subject" class="form-control" 
+                                       placeholder="<?php echo $lang == 'vi' ? 'Chủ đề liên hệ' : 'Contact subject'; ?>"
+                                       value="<?php echo htmlspecialchars($_POST['subject'] ?? $auto_fill_subject); ?>">
                             </div>
                         </div>
                         <div class="col-12">
                             <label class="form-label"><?php echo lang('contact_message'); ?> <span class="text-danger">*</span></label>
-                            <textarea name="message" class="form-control" rows="6" placeholder="<?php echo $lang == 'vi' ? 'Mô tả chi tiết yêu cầu của bạn...' : 'Describe your requirements in detail...'; ?>" required><?php echo $_POST['message'] ?? ''; ?></textarea>
+                            <textarea name="message" class="form-control" rows="6" 
+                                      placeholder="<?php echo $lang == 'vi' ? 'Mô tả chi tiết yêu cầu của bạn...' : 'Describe your requirements in detail...'; ?>" 
+                                      required><?php echo htmlspecialchars($_POST['message'] ?? $auto_fill_message); ?></textarea>
                         </div>
+                        <?php if ($template_id): ?>
+                        <input type="hidden" name="template_id" value="<?php echo $template_id; ?>">
+                        <?php endif; ?>
                         <div class="col-12">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree" required>

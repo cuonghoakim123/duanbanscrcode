@@ -9,7 +9,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$action = isset($_POST['action']) ? $_POST['action'] : '';
+// Hỗ trợ cả GET và POST cho action count
+$action = isset($_POST['action']) ? $_POST['action'] : (isset($_GET['action']) ? $_GET['action'] : '');
 $database = new Database();
 $db = $database->getConnection();
 $user_id = $_SESSION['user_id'];
@@ -61,7 +62,19 @@ switch($action) {
             $stmt->execute();
         }
         
-        echo json_encode(['success' => true, 'message' => 'Đã thêm vào giỏ hàng!']);
+        // Lấy số lượng giỏ hàng sau khi thêm
+        $count_query = "SELECT SUM(quantity) as total FROM carts WHERE user_id = :user_id";
+        $count_stmt = $db->prepare($count_query);
+        $count_stmt->bindParam(':user_id', $user_id);
+        $count_stmt->execute();
+        $count_result = $count_stmt->fetch(PDO::FETCH_ASSOC);
+        $cart_count = (int)($count_result['total'] ?? 0);
+        
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Đã thêm vào giỏ hàng!',
+            'cart_count' => $cart_count
+        ]);
         break;
         
     case 'update':
@@ -107,7 +120,7 @@ switch($action) {
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        echo json_encode(['success' => true, 'count' => $result['total'] ?? 0]);
+        echo json_encode(['success' => true, 'count' => (int)($result['total'] ?? 0)]);
         break;
         
     default:

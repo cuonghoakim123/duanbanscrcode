@@ -159,6 +159,10 @@ function updateQuantity(cartId, newQuantity) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Cập nhật số lượng giỏ hàng trước khi reload
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
             location.reload();
         }
     });
@@ -179,6 +183,10 @@ function removeItem(cartId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Cập nhật số lượng giỏ hàng trước khi reload
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
             location.reload();
         }
     });
