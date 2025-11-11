@@ -58,24 +58,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Regenerate session ID để bảo mật
-    session_regenerate_id(true);
-    
     // Tạo session
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_name'] = $user['fullname'];
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['user_role'] = $user['role'];
-    $_SESSION['user_avatar'] = $user['avatar'] ?? '';
+    $_SESSION['user_avatar'] = $user['avatar'];
     $_SESSION['login_method'] = 'google';
     
     // Log để debug
     error_log("Google Login Success: User ID = " . $user['id'] . ", Name = " . $user['fullname']);
-    
-    // Đảm bảo output buffering không can thiệp
-    if (ob_get_level()) {
-        ob_end_clean();
-    }
     
     echo json_encode([
         'success' => true, 
@@ -84,13 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'id' => $user['id'],
             'name' => $user['fullname'],
             'email' => $user['email'],
-            'avatar' => $user['avatar'] ?? ''
+            'avatar' => $user['avatar']
         ]
     ]);
-    
-    // Đóng session sau khi gửi response
-    session_write_close();
-    exit();
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }

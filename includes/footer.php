@@ -233,9 +233,18 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="<?php echo SITE_URL; ?>/assets/js/main.js"></script>
+    <?php 
+    // Load URL helper nếu chưa có
+    if (!function_exists('asset_url')) {
+        require_once __DIR__ . '/../config/url_helper.php';
+    }
+    ?>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
     
     <script>
+    // Define SITE_URL for JavaScript
+    const SITE_URL = '<?php echo SITE_URL; ?>';
+    
     // Initialize AOS
     AOS.init({
         duration: 1000,
@@ -263,7 +272,7 @@
     
     // Update cart count
     function updateCartCount() {
-        fetch('<?php echo SITE_URL; ?>/cart_handler.php?action=count')
+        fetch(SITE_URL + '/cart_handler.php?action=count')
             .then(response => response.json())
             .then(data => {
                 if(data.count) {
@@ -281,7 +290,7 @@
     <?php if(isset($extra_js)) echo $extra_js; ?>
     
     <!-- Chatbot -->
-    <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/chatbot.css">
+    <link rel="stylesheet" href="<?php echo asset_url('assets/css/chatbot.css'); ?>">
     <div class="chatbot-container">
         <div class="chatbot-window" id="chatbotWindow">
             <div class="chatbot-header">
@@ -323,8 +332,8 @@
         </button>
     </div>
     <script>
-        const CHATBOT_API_URL = '<?php echo SITE_URL; ?>/api/chatbot.php';
+        const CHATBOT_API_URL = '<?php echo page_url('api/chatbot.php'); ?>';
     </script>
-    <script src="<?php echo SITE_URL; ?>/assets/js/chatbot.js"></script>
+    <script src="<?php echo asset_url('assets/js/chatbot.js'); ?>"></script>
 </body>
 </html>

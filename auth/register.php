@@ -334,7 +334,14 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
                 if (error.code === 'auth/popup-closed-by-user') {
                     errorMsg = 'Bạn đã đóng cửa sổ đăng nhập!';
                 } else if (error.code === 'auth/unauthorized-domain') {
-                    errorMsg = 'Domain chưa được authorize trong Firebase Console!\nVui lòng thêm localhost vào Authorized domains.';
+                    const currentDomain = window.location.hostname;
+                    errorMsg = 'Domain chưa được authorize trong Firebase Console!\n\n' +
+                               'Domain hiện tại: ' + currentDomain + '\n\n' +
+                               'Vui lòng:\n' +
+                               '1. Truy cập Firebase Console: https://console.firebase.google.com/\n' +
+                               '2. Vào Settings > Authorized domains\n' +
+                               '3. Thêm domain: ' + currentDomain + '\n\n' +
+                               'Xem hướng dẫn chi tiết trong file FIREBASE_DOMAIN_SETUP.md';
                 } else if (error.code === 'auth/api-key-not-valid') {
                     errorMsg = 'API Key không hợp lệ!\nVui lòng kiểm tra lại config/config.php';
                 }
