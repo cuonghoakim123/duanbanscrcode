@@ -35,7 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->execute();
             
             // Gửi email (trong thực tế sử dụng PHPMailer hoặc SMTP)
-            $reset_link = SITE_URL . "/auth/reset_password.php?token=" . $token;
+            if (!function_exists('page_url')) {
+                require_once __DIR__ . '/../config/url_helper.php';
+            }
+            $reset_link = page_url('auth/reset_password.php') . '?token=' . $token;
             
             // Demo: hiển thị link reset (trong thực tế gửi qua email)
             $success = "Link đặt lại mật khẩu: <a href='$reset_link'>$reset_link</a>";
@@ -77,7 +80,7 @@ include '../includes/header.php';
                     </form>
                     
                     <div class="text-center">
-                        <a href="login.php"><i class="fas fa-arrow-left"></i> Quay lại đăng nhập</a>
+                        <a href="<?php echo SITE_URL; ?>/auth/login.php"><i class="fas fa-arrow-left"></i> Quay lại đăng nhập</a>
                     </div>
                 </div>
             </div>

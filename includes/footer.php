@@ -239,11 +239,13 @@
         require_once __DIR__ . '/../config/url_helper.php';
     }
     ?>
+    <script>
+    // Define SITE_URL for JavaScript (must be before main.js)
+    const SITE_URL = '<?php echo SITE_URL; ?>';
+    </script>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
     
     <script>
-    // Define SITE_URL for JavaScript
-    const SITE_URL = '<?php echo SITE_URL; ?>';
     
     // Initialize AOS
     AOS.init({

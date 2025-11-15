@@ -2,53 +2,60 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
+// Headers để tránh CORS và cache issues
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     
-    $uid = $data['uid'];
+    // Validate dữ liệu
+    if (!isset($data['email']) || !isset($data['name'])) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu thông tin bắt buộc']);
+        exit();
+    }
+    
+    $uid = $data['uid'] ?? '';
     $email = $data['email'];
     $name = $data['name'];
-    $photo = $data['photo'];
-    $google_id = $data['google_id'];
+    $photo = $data['photo'] ?? '';
+    $google_id = $data['google_id'] ?? '';
     
     $database = new Database();
     $db = $database->getConnection();
     
     // Kiểm tra user đã tồn tại chưa
-    $query = "SELECT * FROM users WHERE email = :email OR firebase_uid = :uid";
+    $query = "SELECT * FROM users WHERE email = :email";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':uid', $uid);
     $stmt->execute();
     
     if ($stmt->rowCount() > 0) {
-        // User đã tồn tại, cập nhật thông tin
+        // User đã tồn tại
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        $query = "UPDATE users SET firebase_uid = :uid, google_id = :google_id, avatar = :photo, email_verified = 1 WHERE id = :id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':uid', $uid);
-        $stmt->bindParam(':google_id', $google_id);
-        $stmt->bindParam(':photo', $photo);
-        $stmt->bindParam(':id', $user['id']);
-        $stmt->execute();
+        // Kiểm tra status
+        if (isset($user['status']) && $user['status'] != 'active') {
+            echo json_encode(['success' => false, 'message' => 'Tài khoản đã bị khóa']);
+            exit();
+        }
         
         $user_id = $user['id'];
     } else {
-        // Tạo user mới
-        $query = "INSERT INTO users (email, fullname, firebase_uid, google_id, avatar, email_verified) 
-                  VALUES (:email, :name, :uid, :google_id, :photo, 1)";
+        // Tạo user mới - chỉ dùng các cột cơ bản
+        $query = "INSERT INTO users (email, fullname, created_at) 
+                  VALUES (:email, :name, NOW())";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':uid', $uid);
-        $stmt->bindParam(':google_id', $google_id);
-        $stmt->bindParam(':photo', $photo);
-        $stmt->execute();
         
-        $user_id = $db->lastInsertId();
+        try {
+            $stmt->execute();
+            $user_id = $db->lastInsertId();
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi tạo tài khoản: ' . $e->getMessage()]);
+            exit();
+        }
     }
     
     // Lấy thông tin user
@@ -62,9 +69,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_name'] = $user['fullname'];
     $_SESSION['user_email'] = $user['email'];
-    $_SESSION['user_role'] = $user['role'];
-    $_SESSION['user_avatar'] = $user['avatar'];
+    $_SESSION['user_role'] = $user['role'] ?? 'user';
     $_SESSION['login_method'] = 'google';
+    
+    // Lấy avatar từ database hoặc từ Google photo
+    if (!empty($user['avatar'])) {
+        $avatar_url = $user['avatar'];
+        // Xử lý đường dẫn avatar
+        if (preg_match('/^https?:\/\//', $avatar_url)) {
+            $_SESSION['user_avatar'] = $avatar_url;
+        } elseif (preg_match('/^\/uploads\//', $avatar_url)) {
+            $_SESSION['user_avatar'] = SITE_URL . $avatar_url;
+        } elseif (strpos($avatar_url, 'uploads/') !== false) {
+            $_SESSION['user_avatar'] = SITE_URL . '/' . ltrim($avatar_url, '/');
+        } else {
+            $_SESSION['user_avatar'] = SITE_URL . '/uploads/users/' . basename($avatar_url);
+        }
+    } elseif (!empty($photo)) {
+        // Nếu không có avatar trong DB nhưng có photo từ Google, dùng photo từ Google
+        $_SESSION['user_avatar'] = $photo;
+    } else {
+        $_SESSION['user_avatar'] = null;
+    }
     
     // Log để debug
     error_log("Google Login Success: User ID = " . $user['id'] . ", Name = " . $user['fullname']);
@@ -75,8 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'user' => [
             'id' => $user['id'],
             'name' => $user['fullname'],
-            'email' => $user['email'],
-            'avatar' => $user['avatar']
+            'email' => $user['email']
         ]
     ]);
 } else {

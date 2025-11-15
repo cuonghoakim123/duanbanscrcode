@@ -12,6 +12,42 @@
     if (!function_exists('asset_url')) {
         require_once __DIR__ . '/../config/url_helper.php';
     }
+    
+    // Load avatar từ database nếu session không có
+    if (isset($_SESSION['user_id']) && (!isset($_SESSION['user_avatar']) || empty($_SESSION['user_avatar']))) {
+        try {
+            require_once __DIR__ . '/../config/database.php';
+            $database = new Database();
+            $db = $database->getConnection();
+            
+            $query = "SELECT avatar FROM users WHERE id = :id";
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':id', $_SESSION['user_id']);
+            $stmt->execute();
+            
+            if ($stmt->rowCount() > 0) {
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!empty($user['avatar'])) {
+                    $avatar_url = $user['avatar'];
+                    // Xử lý đường dẫn avatar
+                    if (preg_match('/^https?:\/\//', $avatar_url)) {
+                        $_SESSION['user_avatar'] = $avatar_url;
+                    } elseif (preg_match('/^\/uploads\//', $avatar_url)) {
+                        $_SESSION['user_avatar'] = SITE_URL . $avatar_url;
+                    } elseif (strpos($avatar_url, 'uploads/') !== false) {
+                        $_SESSION['user_avatar'] = SITE_URL . '/' . ltrim($avatar_url, '/');
+                    } else {
+                        $_SESSION['user_avatar'] = SITE_URL . '/uploads/users/' . basename($avatar_url);
+                    }
+                } else {
+                    $_SESSION['user_avatar'] = null;
+                }
+            }
+        } catch (Exception $e) {
+            // Nếu có lỗi, set null để hiển thị icon mặc định
+            $_SESSION['user_avatar'] = null;
+        }
+    }
     ?>
     <link rel="stylesheet" href="<?php echo asset_url('assets/css/style.css'); ?>">
     <link rel="stylesheet" href="<?php echo asset_url('assets/css/landing.css'); ?>">
@@ -59,12 +95,20 @@
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <?php if(isset($_SESSION['user_avatar']) && !empty($_SESSION['user_avatar'])): ?>
-                                    <img src="<?php echo $_SESSION['user_avatar']; ?>" alt="Avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                <?php 
+                                // Lấy avatar từ session hoặc hiển thị icon mặc định
+                                $user_avatar = isset($_SESSION['user_avatar']) && !empty($_SESSION['user_avatar']) && $_SESSION['user_avatar'] !== 'null' ? $_SESSION['user_avatar'] : null;
+                                if ($user_avatar): ?>
+                                    <img src="<?php echo htmlspecialchars($user_avatar); ?>" 
+                                         alt="Avatar" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e0e0e0;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                    <i class="fas fa-user-circle me-2" style="font-size: 32px; color: #6c757d; display: none;"></i>
                                 <?php else: ?>
-                                    <i class="fas fa-user-circle me-2"></i>
+                                    <i class="fas fa-user-circle me-2" style="font-size: 32px; color: #6c757d;"></i>
                                 <?php endif; ?>
-                                <span><?php echo $_SESSION['user_name']; ?></span>
+                                <span><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li class="px-3 py-2 border-bottom">

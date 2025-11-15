@@ -175,7 +175,7 @@ require_once '../config/database.php';
                     <div class="card-body text-center">
                         <?php if ($allConfigured): ?>
                             <p>Firebase đã sẵn sàng! Nhấn nút bên dưới để test đăng nhập:</p>
-                            <a href="login.php" class="btn btn-danger btn-lg">
+                            <a href="<?php echo SITE_URL; ?>/auth/login.php" class="btn btn-danger btn-lg">
                                 <i class="fab fa-google"></i> Test Google Login
                             </a>
                         <?php else: ?>
@@ -188,7 +188,7 @@ require_once '../config/database.php';
                 </div>
                 
                 <div class="text-center mt-4">
-                    <a href="../index.php" class="btn btn-outline-primary">
+                    <a href="<?php echo SITE_URL; ?>" class="btn btn-outline-primary">
                         <i class="fas fa-home"></i> Về trang chủ
                     </a>
                 </div>

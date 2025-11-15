@@ -15,48 +15,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Validate
     if (empty($fullname) || empty($email) || empty($password)) {
-        $error = 'Vui lòng điền đầy đủ thông tin!';
+        $error = 'Vui lòng điền đầy đủ thông tin bắt buộc!';
+    } elseif (strlen($fullname) < 2) {
+        $error = 'Họ tên phải có ít nhất 2 ký tự!';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Email không hợp lệ!';
+    } elseif (!empty($phone) && !preg_match('/^[0-9]{10,11}$/', $phone)) {
+        $error = 'Số điện thoại không hợp lệ! (10-11 chữ số)';
     } elseif (strlen($password) < 6) {
         $error = 'Mật khẩu phải có ít nhất 6 ký tự!';
     } elseif ($password !== $confirm_password) {
         $error = 'Mật khẩu xác nhận không khớp!';
     } else {
-        // Kiểm tra email đã tồn tại
-        $database = new Database();
-        $db = $database->getConnection();
-        
-        $query = "SELECT id FROM users WHERE email = :email";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-        
-        if ($stmt->rowCount() > 0) {
-            $error = 'Email đã được sử dụng!';
-        } else {
-            // Mã hóa mật khẩu
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        try {
+            // Kiểm tra email đã tồn tại
+            $database = new Database();
+            $db = $database->getConnection();
             
-            // Thêm user mới
-            $query = "INSERT INTO users (email, password, fullname, phone) VALUES (:email, :password, :fullname, :phone)";
+            $query = "SELECT id FROM users WHERE email = :email";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':password', $hashed_password);
-            $stmt->bindParam(':fullname', $fullname);
-            $stmt->bindParam(':phone', $phone);
+            $stmt->execute();
             
-            if ($stmt->execute()) {
-                $success = 'Đăng ký thành công! Vui lòng đăng nhập.';
-                header('refresh:2;url=login.php');
+            if ($stmt->rowCount() > 0) {
+                $error = 'Email đã được sử dụng! Vui lòng sử dụng email khác.';
             } else {
-                $error = 'Có lỗi xảy ra, vui lòng thử lại!';
+                // Mã hóa mật khẩu
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                
+                // Thêm user mới
+                $query = "INSERT INTO users (email, password, fullname, phone, created_at) VALUES (:email, :password, :fullname, :phone, NOW())";
+                $stmt = $db->prepare($query);
+                $stmt->bindParam(':email', $email);
+                $stmt->bindParam(':password', $hashed_password);
+                $stmt->bindParam(':fullname', $fullname);
+                $stmt->bindParam(':phone', $phone);
+                
+                if ($stmt->execute()) {
+                    $success = 'Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...';
+                    // Redirect sau 1.5 giây
+                    echo '<script>
+                        setTimeout(function() {
+                            window.location.href = "login.php?registered=1";
+                        }, 1500);
+                    </script>';
+                } else {
+                    $error = 'Có lỗi xảy ra, vui lòng thử lại sau!';
+                }
             }
+        } catch (Exception $e) {
+            $error = 'Lỗi hệ thống: ' . $e->getMessage();
         }
     }
 }
 
 // Không include header để có full screen design
+// Background image URL
+$bgImageUrl = '../assets/images/17.jpg';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -66,14 +81,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title><?php echo $title . ' - ' . SITE_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/auth.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
+    <style>
+        .auth-container {
+            background-image: url('../assets/images/17.jpg') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
+    </style>
 </head>
 <body>
-<div class="auth-container">
+<div class="auth-container" style="background-image: url('../assets/images/17.jpg'); background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;">
     <div class="auth-card">
         <div class="auth-card-header">
             <div class="auth-icon">
-                <i class="fas fa-user-plus"></i>
+                <img src="../assets/images/16.jpg" alt="Register" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3);">
             </div>
             <h2>Tạo tài khoản mới</h2>
             <p>Tham gia cùng chúng tôi ngay hôm nay</p>
@@ -99,10 +122,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </label>
                     <div class="input-group">
                         <i class="fas fa-user input-group-icon"></i>
-                        <input type="text" name="fullname" class="form-control" 
+                        <input type="text" name="fullname" id="fullname" class="form-control" 
                                placeholder="Nhập họ và tên của bạn" 
                                required 
-                               value="<?php echo isset($fullname) ? htmlspecialchars($fullname) : ''; ?>">
+                               minlength="2"
+                               value="<?php echo isset($fullname) ? htmlspecialchars($fullname) : ''; ?>"
+                               autocomplete="name">
                     </div>
                 </div>
                 
@@ -112,10 +137,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </label>
                     <div class="input-group">
                         <i class="fas fa-envelope input-group-icon"></i>
-                        <input type="email" name="email" class="form-control" 
+                        <input type="email" name="email" id="email" class="form-control" 
                                placeholder="Nhập email của bạn" 
                                required 
-                               value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>">
+                               value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>"
+                               autocomplete="email">
                     </div>
                 </div>
                 
@@ -125,10 +151,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </label>
                     <div class="input-group">
                         <i class="fas fa-phone input-group-icon"></i>
-                        <input type="text" name="phone" class="form-control" 
+                        <input type="tel" name="phone" id="phone" class="form-control" 
                                placeholder="Nhập số điện thoại (tùy chọn)" 
-                               value="<?php echo isset($phone) ? htmlspecialchars($phone) : ''; ?>">
+                               pattern="[0-9]{10,11}"
+                               maxlength="11"
+                               value="<?php echo isset($phone) ? htmlspecialchars($phone) : ''; ?>"
+                               autocomplete="tel">
                     </div>
+                    <small class="text-muted">Số điện thoại phải có 10-11 chữ số</small>
                 </div>
                 
                 <div class="form-group">
@@ -141,6 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                placeholder="Tối thiểu 6 ký tự" 
                                required 
                                minlength="6"
+                               autocomplete="new-password"
                                onkeyup="checkPasswordStrength(this.value)">
                         <button type="button" class="password-toggle" onclick="togglePassword('password')">
                             <i class="fas fa-eye" id="passwordToggle"></i>
@@ -149,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="password-strength" id="passwordStrength">
                         <div class="password-strength-bar"></div>
                     </div>
-                    <small class="text-muted">Mật khẩu phải có ít nhất 6 ký tự</small>
+                    <small class="text-muted">Mật khẩu phải có ít nhất 6 ký tự, nên kết hợp chữ hoa, chữ thường và số</small>
                 </div>
                 
                 <div class="form-group">
@@ -161,6 +192,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <input type="password" name="confirm_password" id="confirm_password" class="form-control" 
                                placeholder="Nhập lại mật khẩu" 
                                required
+                               minlength="6"
+                               autocomplete="new-password"
                                onkeyup="checkPasswordMatch()">
                         <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
                             <i class="fas fa-eye" id="confirm_passwordToggle"></i>
@@ -253,11 +286,44 @@ function checkPasswordMatch() {
     }
 }
 
-// Form loading state
+// Form validation and loading state
 document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const fullname = document.getElementById('fullname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
     
+    // Validate fullname
+    if (fullname.length < 2) {
+        e.preventDefault();
+        alert('Họ tên phải có ít nhất 2 ký tự!');
+        return false;
+    }
+    
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        e.preventDefault();
+        alert('Email không hợp lệ!');
+        return false;
+    }
+    
+    // Validate phone (optional but must be valid if provided)
+    if (phone && !/^[0-9]{10,11}$/.test(phone)) {
+        e.preventDefault();
+        alert('Số điện thoại không hợp lệ! Vui lòng nhập 10-11 chữ số.');
+        return false;
+    }
+    
+    // Validate password
+    if (password.length < 6) {
+        e.preventDefault();
+        alert('Mật khẩu phải có ít nhất 6 ký tự!');
+        return false;
+    }
+    
+    // Validate password match
     if (password !== confirmPassword) {
         e.preventDefault();
         alert('Mật khẩu xác nhận không khớp!');
@@ -268,6 +334,14 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     btn.classList.add('loading');
     btn.innerHTML = '<span></span>';
 });
+
+// Add input for fullname
+const fullnameInput = document.getElementById('fullname');
+if (fullnameInput) {
+    fullnameInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '');
+    });
+}
 </script>
 
 <!-- Firebase SDK -->
@@ -303,12 +377,12 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
                 const user = result.user;
                 
                 // Gửi thông tin user về server
-                const response = await fetch('<?php echo SITE_URL; ?>/auth/google_auth.php', {
+                const response = await fetch('google_auth.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'include', // Quan trọng: gửi cookies để session hoạt động
+                    credentials: 'include',
                     body: JSON.stringify({
                         uid: user.uid,
                         email: user.email,
@@ -322,8 +396,8 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
                 console.log('Register response:', data);
                 
                 if (data.success) {
-                    // Redirect về trang chủ ngay lập tức
-                    window.location.href = '<?php echo SITE_URL; ?>';
+                    // Redirect về trang chủ
+                    window.location.href = '../index.php';
                 } else {
                     alert('Lỗi: ' + data.message);
                 }
@@ -334,14 +408,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
                 if (error.code === 'auth/popup-closed-by-user') {
                     errorMsg = 'Bạn đã đóng cửa sổ đăng nhập!';
                 } else if (error.code === 'auth/unauthorized-domain') {
-                    const currentDomain = window.location.hostname;
-                    errorMsg = 'Domain chưa được authorize trong Firebase Console!\n\n' +
-                               'Domain hiện tại: ' + currentDomain + '\n\n' +
-                               'Vui lòng:\n' +
-                               '1. Truy cập Firebase Console: https://console.firebase.google.com/\n' +
-                               '2. Vào Settings > Authorized domains\n' +
-                               '3. Thêm domain: ' + currentDomain + '\n\n' +
-                               'Xem hướng dẫn chi tiết trong file FIREBASE_DOMAIN_SETUP.md';
+                    errorMsg = 'Domain chưa được authorize trong Firebase Console!\nVui lòng thêm localhost vào Authorized domains.';
                 } else if (error.code === 'auth/api-key-not-valid') {
                     errorMsg = 'API Key không hợp lệ!\nVui lòng kiểm tra lại config/config.php';
                 }

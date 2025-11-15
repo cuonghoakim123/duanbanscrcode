@@ -8,7 +8,7 @@ $success = '';
 $token = isset($_GET['token']) ? $_GET['token'] : '';
 
 if (empty($token)) {
-    header('Location: login.php');
+    header('Location: ' . SITE_URL . '/auth/login.php');
     exit();
 }
 
@@ -53,7 +53,7 @@ if ($stmt->rowCount() == 0) {
                 $stmt->execute();
                 
                 $success = 'Đặt lại mật khẩu thành công!';
-                header('refresh:2;url=login.php');
+                header('refresh:2;url=' . SITE_URL . '/auth/login.php');
             } else {
                 $error = 'Có lỗi xảy ra, vui lòng thử lại!';
             }
@@ -97,7 +97,7 @@ include '../includes/header.php';
                     <?php endif; ?>
                     
                     <div class="text-center">
-                        <a href="login.php"><i class="fas fa-arrow-left"></i> Quay lại đăng nhập</a>
+                        <a href="<?php echo SITE_URL; ?>/auth/login.php"><i class="fas fa-arrow-left"></i> Quay lại đăng nhập</a>
                     </div>
                 </div>
             </div>

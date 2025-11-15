@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once 'config/config.php';
 require_once 'config/database.php';
 require_once 'config/lang.php';
@@ -13,8 +12,6 @@ $db = $database->getConnection();
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 9;
 $offset = ($page - 1) * $limit;
-
-include 'includes/header.php';
 
 
 
@@ -98,6 +95,8 @@ function getNewsImageUrl($image) {
     // Nếu chỉ là tên file
     return SITE_URL . '/uploads/news/' . basename($image);
 }
+
+include 'includes/header.php';
 ?>
 
 <div class="page-header bg-gradient-info text-white py-5 mb-5">

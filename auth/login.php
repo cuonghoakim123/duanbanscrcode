@@ -1,16 +1,22 @@
 <?php
 require_once '../config/config.php';
 require_once '../config/database.php';
+require_once '../config/url_helper.php';
 
 $title = 'Đăng nhập';
 $error = '';
+$success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
+    $remember = isset($_POST['remember']) ? true : false;
     
+    // Validation
     if (empty($email) || empty($password)) {
         $error = 'Vui lòng điền đầy đủ thông tin!';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Email không hợp lệ!';
     } else {
         $database = new Database();
         $db = $database->getConnection();
@@ -30,11 +36,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['user_role'] = $user['role'];
                 
+                // Lấy avatar từ database nếu có
+                if (!empty($user['avatar'])) {
+                    $avatar_url = $user['avatar'];
+                    // Xử lý đường dẫn avatar
+                    if (preg_match('/^https?:\/\//', $avatar_url)) {
+                        // URL đầy đủ, giữ nguyên
+                        $_SESSION['user_avatar'] = $avatar_url;
+                    } elseif (preg_match('/^\/uploads\//', $avatar_url)) {
+                        $_SESSION['user_avatar'] = SITE_URL . $avatar_url;
+                    } elseif (strpos($avatar_url, 'uploads/') !== false) {
+                        $_SESSION['user_avatar'] = SITE_URL . '/' . ltrim($avatar_url, '/');
+                    } else {
+                        $_SESSION['user_avatar'] = SITE_URL . '/uploads/users/' . basename($avatar_url);
+                    }
+                } else {
+                    // Nếu không có avatar, set null để hiển thị icon mặc định
+                    $_SESSION['user_avatar'] = null;
+                }
+                
+                // Remember me functionality
+                if ($remember) {
+                    setcookie('user_email', $email, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+                } else {
+                    setcookie('user_email', '', time() - 3600, '/');
+                }
+                
                 // Redirect
                 if ($user['role'] == 'admin') {
-                    header('Location: ' . SITE_URL . '/admin');
+                    header('Location: ../admin/index.php');
                 } else {
-                    header('Location: ' . SITE_URL);
+                    // Redirect to intended page or home
+                    $redirect = isset($_GET['redirect']) ? $_GET['redirect'] : '../index.php';
+                    header('Location: ' . $redirect);
                 }
                 exit();
             } else {
@@ -46,60 +80,173 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-include '../includes/header.php';
-?>
+// Get success message if registered
+if (isset($_GET['registered'])) {
+    $success = 'Đăng ký thành công! Vui lòng đăng nhập.';
+}
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h3 class="text-center mb-4">Đăng nhập</h3>
-                    
-                    <?php if ($error): ?>
-                        <div class="alert alert-danger"><?php echo $error; ?></div>
-                    <?php endif; ?>
-                    
-                    <?php if (isset($_GET['registered'])): ?>
-                        <div class="alert alert-success">Đăng ký thành công! Vui lòng đăng nhập.</div>
-                    <?php endif; ?>
-                    
-                    <form method="POST" action="">
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" required value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Mật khẩu</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                        
-                        <div class="mb-3 text-end">
-                            <a href="forgot_password.php">Quên mật khẩu?</a>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
-                            <i class="fas fa-sign-in-alt"></i> Đăng nhập
-                        </button>
-                    </form>
-                    
-                    <div class="text-center mb-3">
-                        <span>hoặc đăng nhập với</span>
-                    </div>
-                    
-                    <button class="btn btn-danger w-100 mb-3" id="btnGoogleLogin">
-                        <i class="fab fa-google"></i> Đăng nhập bằng Google
-                    </button>
-                    
-                    <div class="text-center">
-                        Chưa có tài khoản? <a href="register.php">Đăng ký ngay</a>
+// Get email from cookie if remember me was set
+$savedEmail = isset($_COOKIE['user_email']) ? $_COOKIE['user_email'] : '';
+
+// Background image URL - dùng đường dẫn tương đối từ file login.php
+// Vì login.php nằm trong thư mục auth/, nên cần dùng ../ để lên root
+$bgImageUrl = '../assets/images/15.jpg';
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $title . ' - ' . SITE_NAME; ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
+    <style>
+        .auth-container {
+            background-image: url('../assets/images/15.jpg') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-container" style="background-image: url('../assets/images/15.jpg'); background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;">
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <div class="auth-icon">
+                <img src="../assets/images/16.jpg" alt="Login" style="width: 190px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3);">
+            </div>
+            <h2>Đăng nhập để tiếp tục</h2>
+        </div>
+        <div class="auth-card-body">
+            <?php if ($error): ?>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($success): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i><?php echo $success; ?>
+                </div>
+            <?php endif; ?>
+            
+            <form method="POST" action="" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope me-2"></i>Email
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-group-icon"></i>
+                        <input type="email" name="email" id="email" class="form-control" 
+                               placeholder="Nhập email của bạn" 
+                               required 
+                               value="<?php echo isset($email) ? htmlspecialchars($email) : htmlspecialchars($savedEmail); ?>"
+                               autocomplete="email">
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock me-2"></i>Mật khẩu
+                    </label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-group-icon"></i>
+                        <input type="password" name="password" id="password" class="form-control" 
+                               placeholder="Nhập mật khẩu" 
+                               required
+                               autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="passwordToggle"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember" <?php echo $savedEmail ? 'checked' : ''; ?>>
+                        <label class="form-check-label" for="remember">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+                    <a href="forgot_password.php" class="auth-link">
+                        Quên mật khẩu?
+                    </a>
+                </div>
+                
+                <button type="submit" class="btn-auth" id="submitBtn">
+                    <span>
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </span>
+                </button>
+            </form>
+            
+            <div class="auth-divider">hoặc</div>
+            
+            <button class="btn-google" id="btnGoogleLogin">
+                <i class="fab fa-google"></i> Đăng nhập bằng Google
+            </button>
+            
+            <div class="auth-footer">
+                Chưa có tài khoản? 
+                <a href="register.php" class="auth-link">Đăng ký ngay</a>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const toggle = document.getElementById(inputId + 'Toggle');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        toggle.classList.remove('fa-eye');
+        toggle.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        toggle.classList.remove('fa-eye-slash');
+        toggle.classList.add('fa-eye');
+    }
+}
+
+// Form loading state
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+        e.preventDefault();
+        return false;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        e.preventDefault();
+        alert('Email không hợp lệ!');
+        return false;
+    }
+    
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.innerHTML = '<span></span>';
+});
+
+// Auto-focus on first empty field
+window.addEventListener('DOMContentLoaded', function() {
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    
+    if (!email.value) {
+        email.focus();
+    } else if (!password.value) {
+        password.focus();
+    }
+});
+</script>
 
 <!-- Firebase SDK -->
 <script type="module">
@@ -134,7 +281,7 @@ include '../includes/header.php';
                 const user = result.user;
                 
                 // Gửi thông tin user về server
-                const response = await fetch('<?php echo SITE_URL; ?>/auth/google_auth.php', {
+                const response = await fetch('google_auth.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -152,16 +299,8 @@ include '../includes/header.php';
                 console.log('Login response:', data);
                 
                 if (data.success) {
-                    // Hiển thị thông báo thành công
-                    alert('Đăng nhập thành công! Xin chào ' + data.user.name);
-                    
-                    // Redirect về trang chủ với reload để cập nhật session
-                    window.location.replace('<?php echo SITE_URL; ?>');
-                    
-                    // Hoặc reload trang hiện tại sau 500ms để đảm bảo session được lưu
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
+                    // Redirect về trang chủ
+                    window.location.href = '../index.php';
                 } else {
                     alert('Lỗi: ' + data.message);
                 }
@@ -172,14 +311,7 @@ include '../includes/header.php';
                 if (error.code === 'auth/popup-closed-by-user') {
                     errorMsg = 'Bạn đã đóng cửa sổ đăng nhập!';
                 } else if (error.code === 'auth/unauthorized-domain') {
-                    const currentDomain = window.location.hostname;
-                    errorMsg = 'Domain chưa được authorize trong Firebase Console!\n\n' +
-                               'Domain hiện tại: ' + currentDomain + '\n\n' +
-                               'Vui lòng:\n' +
-                               '1. Truy cập Firebase Console: https://console.firebase.google.com/\n' +
-                               '2. Vào Settings > Authorized domains\n' +
-                               '3. Thêm domain: ' + currentDomain + '\n\n' +
-                               'Xem hướng dẫn chi tiết trong file FIREBASE_DOMAIN_SETUP.md';
+                    errorMsg = 'Domain chưa được authorize trong Firebase Console!\nVui lòng thêm localhost vào Authorized domains.';
                 } else if (error.code === 'auth/api-key-not-valid') {
                     errorMsg = 'API Key không hợp lệ!\nVui lòng kiểm tra lại config/config.php';
                 }
@@ -189,5 +321,5 @@ include '../includes/header.php';
         });
     }
 </script>
-
-<?php include '../includes/footer.php'; ?>
+</body>
+</html>
