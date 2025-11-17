@@ -228,7 +228,7 @@ include 'includes/admin_header.php';
                                 <td>
                                     <strong><?php echo htmlspecialchars($news['title']); ?></strong>
                                     <?php if ($news['excerpt']): ?>
-                                        <br><small class="text-muted"><?php echo mb_substr(htmlspecialchars($news['excerpt']), 0, 50); ?>...</small>
+                                        <br><small class="text-muted"><?php echo safe_substr(htmlspecialchars($news['excerpt']), 0, 50); ?>...</small>
                                     <?php endif; ?>
                                 </td>
                                 <td>

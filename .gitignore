@@ -1,5 +1,5 @@
 # Config files với thông tin nhạy cảm
-config/config.php
+config/database.php
 
 # Firebase credentials
 firebase-adminsdk-*.json
@@ -42,3 +42,11 @@ composer.lock
 # Backup files
 *_backup.php
 *.bak
+
+# Test files (không cần deploy)
+check_before_deploy.php
+test_*.php
+
+# Logs
+error_log
+php_errors.log

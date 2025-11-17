@@ -1,0 +1,49 @@
+╔═══════════════════════════════════════════════════════════╗
+║  DANH SÁCH FILE CẦN UPLOAD LÊN HOSTING                    ║
+╚═══════════════════════════════════════════════════════════╝
+
+📦 CÁC FILE ĐÃ SỬA (CẦN UPLOAD):
+
+✅ config/config.php              - Thêm safe_substr()
+✅ templates.php                  - 458 dòng
+✅ products.php                   - 744 dòng  
+✅ news.php                       - 484 dòng
+✅ admin/services.php             - 287 dòng
+✅ admin/news.php                 - 290 dòng
+✅ admin/reviews.php              - 441 dòng
+✅ admin/contacts.php             - 378 dòng
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 HƯỚNG DẪN UPLOAD:
+
+1. Mở FTP Client (FileZilla, WinSCP...)
+2. Kết nối tới hosting
+3. Chọn chế độ: BINARY (quan trọng!)
+4. Upload 8 file trên
+5. Kiểm tra:
+   ✓ https://hutechsoncuong.azdigi.shop/templates.php
+   ✓ https://hutechsoncuong.azdigi.shop/products.php
+   ✓ https://hutechsoncuong.azdigi.shop/news.php
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ FILE KHÔNG UPLOAD:
+
+❌ check_before_deploy.php        - Chỉ dùng localhost
+❌ DEPLOY_GUIDE.md                - Tài liệu tham khảo
+❌ FILES_TO_DEPLOY.txt            - File này
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ ĐÃ KIỂM TRA:
+- Tất cả file có đầy đủ số dòng
+- Tất cả file có dùng safe_substr()
+- Function safe_substr() hoạt động tốt
+- Không cần extension mbstring
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tạo: 2025-11-17
+Cập nhật: 2025-11-17
+

@@ -1,12 +1,26 @@
 <?php
+// Bật error reporting trong development (tắt trong production)
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Tắt hiển thị lỗi trực tiếp, chỉ log
+ini_set('log_errors', 1);
+
 require_once 'config/config.php';
 require_once 'config/database.php';
 require_once 'config/lang.php';
 
 $title = lang('news_page_title');
 
-$database = new Database();
-$db = $database->getConnection();
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    if (!$db) {
+        throw new Exception('Không thể kết nối database');
+    }
+} catch (Exception $e) {
+    error_log('Database Error in news.php: ' . $e->getMessage());
+    die('Có lỗi xảy ra. Vui lòng thử lại sau.');
+}
 
 // Phân trang
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -149,7 +163,7 @@ include 'includes/header.php';
                             </span>
                         </div>
                         <h2 class="card-title fw-bold mb-3"><?php echo htmlspecialchars($featured_news['title']); ?></h2>
-                        <p class="card-text text-muted mb-3"><?php echo htmlspecialchars($featured_news['excerpt'] ?: mb_substr(strip_tags($featured_news['content']), 0, 150) . '...'); ?></p>
+                        <p class="card-text text-muted mb-3"><?php echo htmlspecialchars($featured_news['excerpt'] ?: safe_substr(strip_tags($featured_news['content']), 0, 150) . '...'); ?></p>
                         <div class="d-flex justify-content-between align-items-center">
                             <a href="#" class="btn btn-primary"><?php echo lang('read_more'); ?> <i class="fas fa-arrow-right"></i></a>
                             <span class="text-muted"><i class="far fa-eye"></i> <?php echo number_format($featured_news['views']); ?> <?php echo lang('views'); ?></span>
@@ -193,7 +207,7 @@ include 'includes/header.php';
                                     <span><i class="far fa-eye"></i> <?php echo number_format($news['views']); ?></span>
                                 </div>
                                 <h5><?php echo htmlspecialchars($news['title']); ?></h5>
-                                <p class="text-muted"><?php echo htmlspecialchars($news['excerpt'] ?: mb_substr(strip_tags($news['content']), 0, 100) . '...'); ?></p>
+                                <p class="text-muted"><?php echo htmlspecialchars($news['excerpt'] ?: safe_substr(strip_tags($news['content']), 0, 100) . '...'); ?></p>
                                 <a href="#" class="read-more"><?php echo lang('read_more'); ?> <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
@@ -265,7 +279,7 @@ include 'includes/header.php';
                             <?php endif; ?>
                         </div>
                         <div class="popular-content">
-                            <h6><?php echo mb_substr(htmlspecialchars($popular['title']), 0, 50); ?>...</h6>
+                            <h6><?php echo safe_substr(htmlspecialchars($popular['title']), 0, 50); ?>...</h6>
                             <small class="text-muted">
                                 <i class="far fa-clock"></i> 
                                 <?php echo date('d/m/Y', strtotime($popular['published_at'] ?: $popular['created_at'])); ?>

@@ -1,12 +1,26 @@
 <?php
+// Bật error reporting trong development (tắt trong production)
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Tắt hiển thị lỗi trực tiếp, chỉ log
+ini_set('log_errors', 1);
+
 require_once 'config/config.php';
 require_once 'config/database.php';
 require_once 'config/lang.php';
 
 $title = lang('products_page_title');
 
-$database = new Database();
-$db = $database->getConnection();
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    if (!$db) {
+        throw new Exception('Không thể kết nối database');
+    }
+} catch (Exception $e) {
+    error_log('Database Error: ' . $e->getMessage());
+    die('Có lỗi xảy ra. Vui lòng thử lại sau.');
+}
 
 // Phân trang
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -47,37 +61,53 @@ switch($sort) {
 }
 
 // Đếm tổng sản phẩm
-$count_query = "SELECT COUNT(*) as total FROM products p 
-                LEFT JOIN categories c ON p.category_id = c.id 
-                $where";
-$stmt = $db->prepare($count_query);
-foreach ($params as $key => $value) {
-    $stmt->bindValue($key, $value);
+try {
+    $count_query = "SELECT COUNT(*) as total FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id 
+                    $where";
+    $stmt = $db->prepare($count_query);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->execute();
+    $total_products = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    $total_pages = ceil($total_products / $limit);
+} catch (PDOException $e) {
+    error_log('Count Products Error: ' . $e->getMessage());
+    $total_products = 0;
+    $total_pages = 0;
 }
-$stmt->execute();
-$total_products = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-$total_pages = ceil($total_products / $limit);
 
 // Lấy danh sách sản phẩm
-$query = "SELECT p.*, c.name as category_name, c.slug as category_slug 
-          FROM products p 
-          LEFT JOIN categories c ON p.category_id = c.id 
-          $where $order 
-          LIMIT :limit OFFSET :offset";
-$stmt = $db->prepare($query);
-foreach ($params as $key => $value) {
-    $stmt->bindValue($key, $value);
+try {
+    $query = "SELECT p.*, c.name as category_name, c.slug as category_slug 
+              FROM products p 
+              LEFT JOIN categories c ON p.category_id = c.id 
+              $where $order 
+              LIMIT :limit OFFSET :offset";
+    $stmt = $db->prepare($query);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log('Get Products Error: ' . $e->getMessage());
+    $products = [];
 }
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Lấy danh mục
-$query = "SELECT * FROM categories WHERE status = 'active' ORDER BY name";
-$stmt = $db->prepare($query);
-$stmt->execute();
-$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $query = "SELECT * FROM categories WHERE status = 'active' ORDER BY name";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log('Get Categories Error: ' . $e->getMessage());
+    $categories = [];
+}
 
 // Hàm helper để lấy URL ảnh sản phẩm
 function getProductImageUrl($image) {
@@ -279,7 +309,7 @@ include 'includes/header.php';
                                             <?php echo htmlspecialchars($product['name']); ?>
                                         </a>
                                     </h5>
-                                    <p class="product-description"><?php echo htmlspecialchars(mb_substr($product['description'], 0, 80)); ?>...</p>
+                                    <p class="product-description"><?php echo htmlspecialchars(safe_substr($product['description'] ?? '', 0, 80)); ?>...</p>
                                     <div class="product-rating">
                                         <i class="fas fa-star text-warning"></i>
                                         <i class="fas fa-star text-warning"></i>

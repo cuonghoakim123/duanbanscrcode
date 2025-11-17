@@ -255,8 +255,8 @@ include 'includes/admin_header.php';
                                 </td>
                                 <td>
                                     <div class="review-comment" style="max-width: 300px;">
-                                        <?php echo htmlspecialchars(mb_substr($review['comment'], 0, 100)); ?>
-                                        <?php if (mb_strlen($review['comment']) > 100): ?>...<?php endif; ?>
+                                        <?php echo htmlspecialchars(safe_substr($review['comment'], 0, 100)); ?>
+                                        <?php if (strlen($review['comment']) > 100): ?>...<?php endif; ?>
                                     </div>
                                 </td>
                                 <td>

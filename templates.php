@@ -1,18 +1,38 @@
 <?php
+// Bật error reporting trong development (tắt trong production)
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Tắt hiển thị lỗi trực tiếp, chỉ log
+ini_set('log_errors', 1);
+
 require_once 'config/config.php';
 require_once 'config/database.php';
 require_once 'config/lang.php';
 
 $title = lang('templates_page_title');
 
-$database = new Database();
-$db = $database->getConnection();
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    if (!$db) {
+        throw new Exception('Không thể kết nối database');
+    }
+} catch (Exception $e) {
+    error_log('Database Error: ' . $e->getMessage());
+    // Hiển thị thông báo lỗi thân thiện
+    die('Có lỗi xảy ra. Vui lòng thử lại sau.');
+}
 
 // Lấy danh mục
-$categories_query = "SELECT * FROM categories WHERE status = 'active' ORDER BY name";
-$stmt = $db->prepare($categories_query);
-$stmt->execute();
-$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $categories_query = "SELECT * FROM categories WHERE status = 'active' ORDER BY name";
+    $stmt = $db->prepare($categories_query);
+    $stmt->execute();
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log('Categories Query Error: ' . $e->getMessage());
+    $categories = [];
+}
 
 include 'includes/header.php';
 ?>
@@ -135,7 +155,7 @@ include 'includes/header.php';
                 <div class="template-info">
                     <h5><?php echo htmlspecialchars($template['name']); ?></h5>
                     <?php if ($template['description']): ?>
-                        <p class="text-muted small mb-2"><?php echo htmlspecialchars(mb_substr($template['description'], 0, 60)); ?>...</p>
+                        <p class="text-muted small mb-2"><?php echo htmlspecialchars(safe_substr($template['description'], 0, 60)); ?>...</p>
                     <?php endif; ?>
                     <div class="d-flex justify-content-between align-items-center">
                         <div>

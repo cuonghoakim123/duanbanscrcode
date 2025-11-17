@@ -209,8 +209,8 @@ include 'includes/admin_header.php';
                                 <td><?php echo htmlspecialchars($contact['subject'] ?? '-'); ?></td>
                                 <td>
                                     <div class="contact-message" style="max-width: 300px;">
-                                        <?php echo htmlspecialchars(mb_substr($contact['message'], 0, 100)); ?>
-                                        <?php if (mb_strlen($contact['message']) > 100): ?>...<?php endif; ?>
+                                        <?php echo htmlspecialchars(safe_substr($contact['message'], 0, 100)); ?>
+                                        <?php if (strlen($contact['message']) > 100): ?>...<?php endif; ?>
                                     </div>
                                 </td>
                                 <td>

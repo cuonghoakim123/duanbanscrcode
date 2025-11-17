@@ -208,7 +208,7 @@ include 'includes/admin_header.php';
                                 <td>
                                     <strong><?php echo htmlspecialchars($service['name']); ?></strong>
                                     <?php if ($service['description']): ?>
-                                        <br><small class="text-muted"><?php echo mb_substr(htmlspecialchars($service['description']), 0, 50); ?>...</small>
+                                        <br><small class="text-muted"><?php echo safe_substr(htmlspecialchars($service['description']), 0, 50); ?>...</small>
                                     <?php endif; ?>
                                 </td>
                                 <td>
