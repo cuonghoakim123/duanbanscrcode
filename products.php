@@ -1,7 +1,16 @@
 <?php
-// Bật error reporting trong development (tắt trong production)
-error_reporting(E_ALL);
-ini_set('display_errors', 0); // Tắt hiển thị lỗi trực tiếp, chỉ log
+// Error reporting - tự động detect môi trường (development/production)
+// Trên localhost hoặc development: hiển thị errors
+// Trên hosting/production: chỉ log errors, không hiển thị
+$is_localhost = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '::1']) || 
+                strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false;
+if ($is_localhost) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 0); // Tắt hiển thị lỗi trên production
+}
 ini_set('log_errors', 1);
 
 require_once 'config/config.php';

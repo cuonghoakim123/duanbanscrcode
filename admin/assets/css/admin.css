@@ -306,8 +306,42 @@ body {
     color: white;
 }
 
+.btn-admin-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+    color: white;
+}
+
+.btn-admin-warning {
+    background: var(--admin-warning);
+    color: white;
+}
+
+.btn-admin-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+    color: white;
+}
+
+.btn-admin-info {
+    background: var(--admin-info);
+    color: white;
+}
+
+.btn-admin-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+    color: white;
+}
+
 .btn-admin-danger {
     background: var(--admin-danger);
+    color: white;
+}
+
+.btn-admin-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
     color: white;
 }
 
@@ -365,6 +399,7 @@ body {
 .badge-danger { background: #fed7d7; color: #742a2a; }
 .badge-info { background: #bee3f8; color: #2c5282; }
 .badge-primary { background: #e9d8fd; color: #553c9a; }
+.badge-secondary { background: #e2e8f0; color: #2d3748; }
 
 /* Forms */
 .form-group-admin {
@@ -490,5 +525,18 @@ body {
 .empty-state h4 {
     margin-bottom: 10px;
     color: var(--admin-text);
+}
+
+/* Utility Classes (backup - Bootstrap should handle most of these) */
+.w-100 {
+    width: 100% !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+.gap-2 {
+    gap: 0.5rem !important;
 }
 

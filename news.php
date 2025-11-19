@@ -1,7 +1,16 @@
 <?php
-// Bật error reporting trong development (tắt trong production)
-error_reporting(E_ALL);
-ini_set('display_errors', 0); // Tắt hiển thị lỗi trực tiếp, chỉ log
+// Error reporting - tự động detect môi trường (development/production)
+// Trên localhost hoặc development: hiển thị errors
+// Trên hosting/production: chỉ log errors, không hiển thị
+$is_localhost = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '::1']) || 
+                strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false;
+if ($is_localhost) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 0); // Tắt hiển thị lỗi trên production
+}
 ini_set('log_errors', 1);
 
 require_once 'config/config.php';
@@ -65,9 +74,12 @@ try {
     // Lấy tổng số tin tức để phân trang
     $total_query = "SELECT COUNT(*) as total FROM news WHERE status = 'active'";
     if ($featured_news) {
-        $total_query .= " AND id != " . $featured_news['id'];
+        $total_query .= " AND id != :featured_id";
     }
     $total_stmt = $db->prepare($total_query);
+    if ($featured_news) {
+        $total_stmt->bindValue(':featured_id', $featured_news['id'], PDO::PARAM_INT);
+    }
     $total_stmt->execute();
     $total_news = $total_stmt->fetch(PDO::FETCH_ASSOC)['total'];
     $total_pages = ceil($total_news / $limit);

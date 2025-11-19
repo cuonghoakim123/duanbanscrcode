@@ -14,13 +14,14 @@ function getSiteUrl() {
     $script_name = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
     $script_dir = dirname($script_name);
     
-    // Xác định base path
+    // Xác định base path - tương thích cả Windows và Linux hosting
+    // Normalize đường dẫn trước khi kiểm tra
+    $script_dir = str_replace('\\', '/', $script_dir);
     // Nếu script ở root (/, \), base_path là rỗng
-    if ($script_dir == '/' || $script_dir == '\\' || $script_dir == '.') {
+    if ($script_dir == '/' || $script_dir == '\\' || $script_dir == '.' || empty($script_dir)) {
         $base_path = '';
     } else {
-        // Chuyển đổi backslash thành forward slash
-        $base_path = str_replace('\\', '/', $script_dir);
+        $base_path = $script_dir;
         // Đảm bảo có leading slash
         if (strpos($base_path, '/') !== 0) {
             $base_path = '/' . $base_path;
@@ -61,10 +62,14 @@ define('MOMO_NOTIFY_URL', SITE_URL . '/payment/momo_ipn.php');
 
 // Cấu hình session
 if (session_status() === PHP_SESSION_NONE) {
-    // Cấu hình session cookie
+    // Cấu hình session cookie - tự động detect HTTPS cho hosting
+    $is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ||
+                (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https');
+    
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_secure', 0); // Đặt 1 nếu dùng HTTPS
+    ini_set('session.cookie_secure', $is_https ? 1 : 0); // Tự động bật nếu dùng HTTPS
     ini_set('session.cookie_samesite', 'Lax');
     
     session_start();
