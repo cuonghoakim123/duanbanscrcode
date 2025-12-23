@@ -64,10 +64,98 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $sale_price = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
     $image = trim($_POST['image'] ?? '');
     $gallery = trim($_POST['gallery'] ?? '');
+    
+    // Xử lý gallery: normalize tất cả URLs và loại bỏ /admin/uploads/
+    if (!empty($gallery)) {
+        // Tách các URLs (có thể cách nhau bởi dấu phẩy)
+        $gallery_urls = array_map('trim', explode(',', $gallery));
+        $normalized_urls = [];
+        
+        foreach ($gallery_urls as $url) {
+            if (empty($url)) continue;
+            
+            // Sửa đường dẫn sai nếu có /admin/uploads/templates/
+            if (strpos($url, '/admin/uploads/templates/') !== false) {
+                $url = str_replace('/admin/uploads/templates/', '/uploads/templates/', $url);
+            }
+            if (strpos($url, 'admin/uploads/templates/') !== false) {
+                $url = str_replace('admin/uploads/templates/', 'uploads/templates/', $url);
+            }
+            
+            // Nếu là URL đầy đủ từ SITE_URL, extract tên file hoặc giữ nguyên
+            if (strpos($url, SITE_URL) === 0) {
+                if (strpos($url, '/uploads/templates/') !== false) {
+                    // Chỉ lưu tên file
+                    $url = basename(str_replace(SITE_URL . '/uploads/templates/', '', $url));
+                }
+            }
+            // Nếu là URL external, giữ nguyên
+            elseif (preg_match('/^https?:\/\//', $url)) {
+                // Giữ nguyên URL external
+            }
+            // Nếu là đường dẫn relative, extract tên file
+            else {
+                $url = basename($url);
+            }
+            
+            if (!empty($url)) {
+                $normalized_urls[] = $url;
+            }
+        }
+        
+        // Kết hợp lại thành chuỗi, cách nhau bởi dấu phẩy
+        $gallery = implode(', ', $normalized_urls);
+    }
     $demo_url = trim($_POST['demo_url'] ?? '');
     $features = trim($_POST['features'] ?? '');
     $featured = isset($_POST['featured']) ? 1 : 0;
     $status = $_POST['status'] ?? 'active';
+    
+    // Xử lý image: chỉ lưu tên file vào database (không lưu URL đầy đủ)
+    if (!empty($image)) {
+        $original_image = $image;
+        
+        // Bước 1: Sửa đường dẫn sai nếu có /admin/uploads/templates/
+        $image = str_replace('/admin/uploads/templates/', '/uploads/templates/', $image);
+        $image = str_replace('admin/uploads/templates/', 'uploads/templates/', $image);
+        
+        // Bước 2: Loại bỏ SITE_URL nếu có
+        if (strpos($image, SITE_URL) === 0) {
+            $image = str_replace(SITE_URL, '', $image);
+            $image = ltrim($image, '/');
+        }
+        
+        // Bước 3: Loại bỏ /uploads/templates/ nếu có
+        if (strpos($image, 'uploads/templates/') === 0) {
+            $image = str_replace('uploads/templates/', '', $image);
+        }
+        if (strpos($image, '/uploads/templates/') === 0) {
+            $image = str_replace('/uploads/templates/', '', $image);
+        }
+        
+        // Bước 4: Nếu là URL external, extract tên file từ path
+        if (preg_match('/^https?:\/\//', $image)) {
+            $parsed = parse_url($image);
+            $image = isset($parsed['path']) ? basename($parsed['path']) : basename($image);
+        }
+        
+        // Bước 5: Đảm bảo chỉ lấy tên file (loại bỏ mọi đường dẫn còn lại)
+        $image = basename($image);
+        
+        // Debug log
+        if ($original_image !== $image) {
+            error_log("Template Edit - Image normalized: '$original_image' -> '$image'");
+        }
+        
+        // Đảm bảo không rỗng
+        if (empty($image)) {
+            error_log("Template Edit - ERROR: Image became empty! Original: '$original_image'");
+            $image = basename($original_image); // Fallback
+        }
+    } else {
+        // Nếu image rỗng, có thể giữ nguyên giá trị cũ trong database
+        // Không làm gì, để database giữ nguyên giá trị cũ
+    }
     
     // Validation
     if (empty($name)) {
@@ -121,10 +209,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bindParam(':id', $template_id);
             
             if ($stmt->execute()) {
-                header('Location: templates.php?msg=updated');
+                // Log để debug
+                error_log("Template updated successfully - ID: $template_id, Image: '$image'");
+                
+                // Verify: Kiểm tra lại giá trị đã được lưu
+                $verify_query = "SELECT image FROM templates WHERE id = :id";
+                $verify_stmt = $db->prepare($verify_query);
+                $verify_stmt->bindParam(':id', $template_id);
+                $verify_stmt->execute();
+                $verified = $verify_stmt->fetch(PDO::FETCH_ASSOC);
+                error_log("Template verify - ID: $template_id, Saved image: '" . ($verified['image'] ?? 'NULL') . "'");
+                
+                // Redirect với timestamp để tránh cache
+                header('Location: templates.php?msg=updated&t=' . time());
                 exit();
             } else {
                 $error = 'Có lỗi xảy ra khi cập nhật mẫu giao diện!';
+                error_log("Template update failed - ID: $template_id, Error: " . implode(', ', $stmt->errorInfo()));
             }
         }
     }
@@ -201,26 +302,74 @@ include 'includes/admin_header.php';
                                 </div>
                                 <div class="mb-3">
                                     <div class="d-flex gap-2 align-items-center">
-                                        <input type="url" name="image" id="imageUrl" class="form-control-admin" 
+                                        <input type="text" name="image" id="imageUrl" class="form-control-admin" 
                                                value="<?php echo htmlspecialchars($template['image'] ?? ''); ?>"
-                                               placeholder="Hoặc nhập URL hình ảnh">
+                                               placeholder="Tên file ảnh (sẽ tự động điền sau khi upload)">
                                         <button type="button" class="btn-admin btn-admin-sm" style="background: #4299e1; color: white;" onclick="clearImage()">
                                             <i class="fas fa-times"></i> Xóa
                                         </button>
                                     </div>
+                                    <small class="text-muted">Sau khi chọn file ảnh, tên file sẽ tự động được điền vào đây</small>
                                 </div>
                                 <div id="imagePreview" class="mt-3" style="<?php echo $template['image'] ? '' : 'display: none;'; ?>">
                                     <?php 
                                     $preview_url = '';
                                     if ($template['image']) {
-                                        $preview_url = $template['image'];
-                                        if (!preg_match('/^https?:\/\//', $preview_url) && !preg_match('/^\//', $preview_url)) {
-                                            $preview_url = SITE_URL . '/uploads/templates/' . $preview_url;
+                                        $image_value = trim($template['image']);
+                                        
+                                        // Nếu là URL external (http/https), kiểm tra và sửa nếu cần
+                                        if (preg_match('/^https?:\/\//', $image_value)) {
+                                            // Kiểm tra xem có chứa /admin/uploads/ không (sai) và sửa lại
+                                            if (strpos($image_value, '/admin/uploads/templates/') !== false) {
+                                                $image_value = str_replace('/admin/uploads/templates/', '/uploads/templates/', $image_value);
+                                            }
+                                            $preview_url = $image_value;
                                         }
+                                        // Nếu là URL đầy đủ từ SITE_URL, extract tên file
+                                        elseif (strpos($image_value, SITE_URL) === 0) {
+                                            // Kiểm tra và sửa nếu có /admin/uploads/
+                                            if (strpos($image_value, '/admin/uploads/templates/') !== false) {
+                                                $image_value = str_replace('/admin/uploads/templates/', '/uploads/templates/', $image_value);
+                                            }
+                                            // Extract tên file
+                                            if (strpos($image_value, '/uploads/templates/') !== false) {
+                                                $filename = basename(str_replace(SITE_URL . '/uploads/templates/', '', $image_value));
+                                                $preview_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $filename;
+                                            } else {
+                                                $preview_url = $image_value;
+                                            }
+                                        }
+                                        // Nếu là đường dẫn relative bắt đầu bằng /uploads/templates/
+                                        elseif (strpos($image_value, '/uploads/templates/') === 0) {
+                                            $filename = basename($image_value);
+                                            $preview_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $filename;
+                                        }
+                                        // Nếu là đường dẫn có /admin/uploads/ (sai), sửa lại
+                                        elseif (strpos($image_value, '/admin/uploads/templates/') !== false || strpos($image_value, 'admin/uploads/templates/') !== false) {
+                                            // Extract tên file và sửa đường dẫn
+                                            $filename = basename($image_value);
+                                            $preview_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $filename;
+                                        }
+                                        // Nếu chỉ là tên file hoặc đường dẫn tương đối
+                                        else {
+                                            // Lấy chỉ tên file (loại bỏ mọi đường dẫn)
+                                            $filename = basename($image_value);
+                                            // Xây dựng absolute URL
+                                            $preview_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $filename;
+                                        }
+                                        
+                                        // All URLs should already be absolute at this point
+                                        // No need for additional processing
                                     }
                                     ?>
                                     <img id="previewImg" src="<?php echo htmlspecialchars($preview_url); ?>" alt="Preview" 
-                                         style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 2px solid var(--admin-border); object-fit: contain;">
+                                         style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 2px solid var(--admin-border); object-fit: contain;"
+                                         onerror="handleImageError(this);"
+                                         onload="handleImageLoad(this);">
+                                    <div id="imageError" class="alert alert-warning" style="display: none; margin-top: 10px;">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        <span id="imageErrorText">Không thể tải ảnh. Vui lòng kiểm tra đường dẫn hoặc upload lại ảnh.</span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -231,7 +380,25 @@ include 'includes/admin_header.php';
                                     <small class="text-muted">Chọn nhiều file ảnh</small>
                                 </div>
                                 <textarea name="gallery" id="galleryUrls" class="form-control-admin" rows="3" 
-                                          placeholder="URLs hình ảnh, cách nhau bởi dấu phẩy"><?php echo htmlspecialchars($template['gallery'] ?? ''); ?></textarea>
+                                          placeholder="URLs hình ảnh, cách nhau bởi dấu phẩy"><?php 
+                                    // Normalize gallery URLs khi hiển thị
+                                    if (!empty($template['gallery'])) {
+                                        $gallery_urls = array_map('trim', explode(',', $template['gallery']));
+                                        $normalized_gallery = [];
+                                        foreach ($gallery_urls as $url) {
+                                            if (empty($url)) continue;
+                                            // Sửa đường dẫn sai nếu có /admin/uploads/
+                                            if (strpos($url, '/admin/uploads/templates/') !== false) {
+                                                $url = str_replace('/admin/uploads/templates/', '/uploads/templates/', $url);
+                                            }
+                                            if (strpos($url, 'admin/uploads/templates/') !== false) {
+                                                $url = str_replace('admin/uploads/templates/', 'uploads/templates/', $url);
+                                            }
+                                            $normalized_gallery[] = $url;
+                                        }
+                                        echo htmlspecialchars(implode(', ', $normalized_gallery));
+                                    }
+                                ?></textarea>
                                 <div id="galleryPreview" class="mt-3 d-flex flex-wrap gap-2"></div>
                             </div>
                         </div>
@@ -334,40 +501,467 @@ include 'includes/admin_header.php';
 </div>
 
 <script>
-// Auto generate slug from name
-document.querySelector('input[name="name"]').addEventListener('input', function() {
-    const slugInput = document.querySelector('input[name="slug"]');
-    if (!slugInput.value || slugInput.dataset.manual !== 'true') {
-        const slug = this.value.toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        slugInput.value = slug;
+// Image error handling functions
+function handleImageError(img) {
+    console.log('Image load error for:', img.src);
+    const errorDiv = document.getElementById('imageError');
+    const errorText = document.getElementById('imageErrorText');
+    if (errorDiv && errorText) {
+        errorText.textContent = 'Không thể tải ảnh: ' + img.src;
+        errorDiv.style.display = 'block';
     }
-});
-
-// Mark slug as manually edited
-document.querySelector('input[name="slug"]').addEventListener('input', function() {
-    this.dataset.manual = 'true';
-});
-
-// Clear image
-function clearImage() {
-    document.getElementById('imageUrl').value = '';
-    document.getElementById('imageUpload').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
+    img.style.display = 'none';
 }
 
-// Image URL preview
-document.getElementById('imageUrl').addEventListener('input', function() {
-    const preview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    if (this.value) {
-        previewImg.src = this.value;
-        preview.style.display = 'block';
-    } else if (!document.getElementById('imageUpload').files.length) {
-        preview.style.display = 'none';
+function handleImageLoad(img) {
+    console.log('Image loaded successfully:', img.src);
+    const errorDiv = document.getElementById('imageError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+    }
+    img.style.display = 'block';
+}
+
+// Clear image function
+function clearImage() {
+    const imageUrl = document.getElementById('imageUrl');
+    const imagePreview = document.getElementById('imagePreview');
+    const imageUpload = document.getElementById('imageUpload');
+    
+    if (imageUrl) imageUrl.value = '';
+    if (imagePreview) imagePreview.style.display = 'none';
+    if (imageUpload) imageUpload.value = '';
+}
+
+// Helper function để normalize image URL - loại bỏ /admin/ và đảm bảo absolute URL
+function normalizeImageUrl(url, siteUrl) {
+    if (!url || !url.trim()) return '';
+    
+    let normalized = url.trim();
+    
+    // Sửa đường dẫn sai nếu có /admin/uploads/templates/
+    if (normalized.indexOf('/admin/uploads/templates/') !== -1) {
+        normalized = normalized.replace('/admin/uploads/templates/', '/uploads/templates/');
+    }
+    if (normalized.indexOf('admin/uploads/templates/') !== -1) {
+        normalized = normalized.replace('admin/uploads/templates/', 'uploads/templates/');
+    }
+    
+    // Nếu là URL external (http/https), trả về sau khi sửa
+    if (normalized.match(/^https?:\/\//)) {
+        return normalized;
+    }
+    
+    // Nếu là URL đầy đủ từ SITE_URL, extract tên file
+    if (normalized.indexOf(siteUrl) === 0) {
+        if (normalized.indexOf('/uploads/templates/') !== -1) {
+            const filename = normalized.split('/uploads/templates/')[1].split('/').pop();
+            return siteUrl + '/uploads/templates/' + filename;
+        }
+        return normalized;
+    }
+    
+    // Nếu là đường dẫn relative bắt đầu bằng /uploads/templates/
+    if (normalized.indexOf('/uploads/templates/') === 0) {
+        const filename = normalized.replace('/uploads/templates/', '').split('/').pop();
+        return siteUrl + '/uploads/templates/' + filename;
+    }
+    
+    // Nếu là đường dẫn absolute từ root (bắt đầu bằng /)
+    if (normalized.indexOf('/') === 0) {
+        return siteUrl + normalized;
+    }
+    
+    // Chỉ là tên file, thêm prefix
+    const filename = normalized.split('/').pop();
+    return siteUrl + '/uploads/templates/' + filename;
+}
+
+// Image error handler
+function handleImageError(img) {
+    console.error('Image load error:', img.src);
+    img.style.display = 'none';
+    const errorDiv = document.getElementById('imageError');
+    if (errorDiv) {
+        errorDiv.style.display = 'block';
+        const errorText = document.getElementById('imageErrorText');
+        if (errorText) {
+            errorText.textContent = 'Không thể tải ảnh: ' + img.src.split('/').pop() + '. Vui lòng kiểm tra đường dẫn hoặc upload lại ảnh.';
+        }
+    }
+}
+
+// Image load handler
+function handleImageLoad(img) {
+    console.log('Image loaded successfully:', img.src);
+    img.style.display = 'block';
+    const errorDiv = document.getElementById('imageError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto generate slug from name
+    const nameInput = document.querySelector('input[name="name"]');
+    if (nameInput) {
+        nameInput.addEventListener('input', function() {
+            const slugInput = document.querySelector('input[name="slug"]');
+            if (slugInput && (!slugInput.value || slugInput.dataset.manual !== 'true')) {
+                const slug = this.value.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                slugInput.value = slug;
+            }
+        });
+    }
+
+    // Mark slug as manually edited
+    const slugInput = document.querySelector('input[name="slug"]');
+    if (slugInput) {
+        slugInput.addEventListener('input', function() {
+            this.dataset.manual = 'true';
+        });
+    }
+
+    // Upload image function
+    window.uploadTemplateImage = function(file, type) {
+        if (!file) {
+            alert('Vui lòng chọn file ảnh');
+            return;
+        }
+
+        // Kiểm tra kích thước file (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File quá lớn. Kích thước tối đa: 5MB');
+            return;
+        }
+
+        // Kiểm tra loại file
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WebP)');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('upload_type', 'template');
+        
+        // Hiển thị loading
+        const imageUpload = document.getElementById('imageUpload');
+        const originalText = imageUpload ? imageUpload.nextElementSibling : null;
+        if (originalText && originalText.tagName === 'SMALL') {
+            originalText.textContent = 'Đang upload...';
+            originalText.style.color = '#0d6efd';
+        }
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.addEventListener('load', function() {
+            if (originalText) {
+                originalText.textContent = 'Chọn file ảnh (JPG, PNG, GIF, WebP - Tối đa 5MB)';
+                originalText.style.color = '';
+            }
+
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        if (type === 'image') {
+                            // Lưu chỉ tên file vào database (không lưu URL đầy đủ)
+                            const imageUrlInput = document.getElementById('imageUrl');
+                            let filename = '';
+                            
+                            if (imageUrlInput) {
+                                if (response.filename) {
+                                    filename = response.filename;
+                                    imageUrlInput.value = filename;
+                                } else if (response.url) {
+                                    // Nếu không có filename, extract từ URL
+                                    const urlParts = response.url.split('/');
+                                    filename = urlParts[urlParts.length - 1];
+                                    imageUrlInput.value = filename;
+                                }
+                            }
+                            
+                            // Hiển thị preview với URL đầy đủ
+                            const previewImg = document.getElementById('previewImg');
+                            const imagePreview = document.getElementById('imagePreview');
+                            
+                            if (previewImg && response.url) {
+                                const siteUrl = '<?php echo SITE_URL; ?>';
+                                // Sử dụng helper function để normalize URL
+                                const normalizedUrl = normalizeImageUrl(response.url, siteUrl);
+                                previewImg.src = normalizedUrl;
+                                
+                                console.log('Setting uploaded image src to:', normalizedUrl);
+                                
+                                previewImg.onerror = function() {
+                                    console.error('Failed to load uploaded image:', normalizedUrl);
+                                    handleImageError(this);
+                                };
+                                
+                                previewImg.onload = function() {
+                                    console.log('Uploaded image loaded successfully:', normalizedUrl);
+                                    handleImageLoad(this);
+                                };
+                            }
+                            
+                            if (imagePreview) {
+                                imagePreview.style.display = 'block';
+                            }
+                            
+                            // Trigger update preview với giá trị filename mới
+                            if (imageUrlInput && filename) {
+                                // Gọi updatePreview để đảm bảo URL được xây dựng đúng
+                                setTimeout(function() {
+                                    if (typeof window.updatePreview === 'function') {
+                                        window.updatePreview(filename);
+                                    } else {
+                                        // Fallback: trigger input event
+                                        imageUrlInput.dispatchEvent(new Event('input'));
+                                    }
+                                }, 100);
+                            }
+                            
+                            console.log('Upload successful. Filename:', filename, 'URL:', response.url);
+                        } else if (type === 'gallery') {
+                            const galleryUrls = document.getElementById('galleryUrls');
+                            const siteUrl = '<?php echo SITE_URL; ?>';
+                            
+                            if (galleryUrls && response.url) {
+                                // Normalize URL trước khi lưu
+                                const normalizedUrl = normalizeImageUrl(response.url, siteUrl);
+                                const currentUrls = galleryUrls.value.trim();
+                                // Chỉ lưu tên file hoặc URL đúng (không có /admin/)
+                                const urlToSave = normalizedUrl.indexOf(siteUrl + '/uploads/templates/') === 0 
+                                    ? normalizedUrl.replace(siteUrl + '/uploads/templates/', '') 
+                                    : normalizedUrl;
+                                const newUrl = currentUrls ? currentUrls + ', ' + urlToSave : urlToSave;
+                                galleryUrls.value = newUrl;
+                            }
+                            
+                            // Add to gallery preview
+                            const galleryPreview = document.getElementById('galleryPreview');
+                            if (galleryPreview && response.url) {
+                                const siteUrl = '<?php echo SITE_URL; ?>';
+                                const normalizedUrl = normalizeImageUrl(response.url, siteUrl);
+                                
+                                const imgDiv = document.createElement('div');
+                                imgDiv.style.position = 'relative';
+                                imgDiv.style.width = '100px';
+                                imgDiv.style.height = '100px';
+                                imgDiv.innerHTML = `
+                                    <img src="${normalizedUrl}" alt="Gallery" 
+                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid var(--admin-border);"
+                                         onerror="this.parentElement.remove();">
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            style="position: absolute; top: -5px; right: -5px; border-radius: 50%; width: 24px; height: 24px; padding: 0;"
+                                            onclick="removeGalleryImage(this, '${normalizedUrl}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                `;
+                                galleryPreview.appendChild(imgDiv);
+                            }
+                        }
+                    } else {
+                        alert('Lỗi: ' + (response.message || 'Upload thất bại'));
+                    }
+                } catch (e) {
+                    console.error('Parse error:', e);
+                    alert('Có lỗi xảy ra khi xử lý phản hồi từ server');
+                }
+            } else {
+                alert('Có lỗi xảy ra khi upload ảnh (Status: ' + xhr.status + ')');
+            }
+        });
+        
+        xhr.addEventListener('error', function() {
+            if (originalText) {
+                originalText.textContent = 'Chọn file ảnh (JPG, PNG, GIF, WebP - Tối đa 5MB)';
+                originalText.style.color = '';
+            }
+            alert('Có lỗi xảy ra khi upload ảnh. Vui lòng kiểm tra kết nối mạng.');
+        });
+        
+        xhr.open('POST', 'upload_image.php');
+        xhr.send(formData);
+    };
+
+    // Remove gallery image
+    window.removeGalleryImage = function(button, url) {
+        const galleryUrls = document.getElementById('galleryUrls');
+        if (galleryUrls) {
+            const siteUrl = '<?php echo SITE_URL; ?>';
+            // Normalize URL để so sánh
+            const normalizedUrl = normalizeImageUrl(url, siteUrl);
+            // Extract tên file từ URL để so sánh
+            const filename = normalizedUrl.split('/').pop();
+            
+            // Tách các URLs và filter
+            let urls = galleryUrls.value.split(',').map(u => u.trim());
+            urls = urls.filter(u => {
+                const uNormalized = normalizeImageUrl(u, siteUrl);
+                const uFilename = uNormalized.split('/').pop();
+                // So sánh cả URL đầy đủ và tên file
+                return u !== url && u !== normalizedUrl && u !== filename && uNormalized !== normalizedUrl && uFilename !== filename;
+            });
+            galleryUrls.value = urls.join(', ');
+        }
+        if (button && button.parentElement) {
+            button.parentElement.remove();
+        }
+    };
+
+    // Clear image
+    window.clearImage = function() {
+        const imageUrl = document.getElementById('imageUrl');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        if (imageUrl) imageUrl.value = '';
+        if (imageUpload) imageUpload.value = '';
+        if (imagePreview) imagePreview.style.display = 'none';
+    };
+
+    // Image upload handlers
+    const imageUpload = document.getElementById('imageUpload');
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadTemplateImage(file, 'image');
+            }
+        });
+    }
+
+    const galleryUpload = document.getElementById('galleryUpload');
+    if (galleryUpload) {
+        galleryUpload.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                uploadTemplateImage(file, 'gallery');
+            });
+        });
+    }
+
+    // Image URL preview
+    const imageUrlInput = document.getElementById('imageUrl');
+    if (imageUrlInput) {
+        // Function to update preview - expose to global scope
+        window.updatePreview = function(value) {
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            if (!preview || !previewImg) return;
+            
+            if (value && value.trim()) {
+                const siteUrl = '<?php echo SITE_URL; ?>';
+                // Sử dụng helper function để normalize URL
+                const normalizedUrl = normalizeImageUrl(value, siteUrl);
+                previewImg.src = normalizedUrl;
+                
+                console.log('Setting preview image src to:', normalizedUrl);
+                preview.style.display = 'block';
+                
+                // Thêm error và load handlers
+                previewImg.onerror = function() {
+                    handleImageError(this);
+                };
+                
+                previewImg.onload = function() {
+                    handleImageLoad(this);
+                };
+            } else {
+                preview.style.display = 'none';
+            }
+        };
+        
+        // Update preview khi input thay đổi
+        imageUrlInput.addEventListener('input', function() {
+            if (typeof window.updatePreview === 'function') {
+                window.updatePreview(this.value);
+            }
+        });
+        
+        // Update preview khi blur (khi người dùng rời khỏi input)
+        imageUrlInput.addEventListener('blur', function() {
+            if (typeof window.updatePreview === 'function') {
+                window.updatePreview(this.value);
+            }
+        });
+        
+        // Update preview ban đầu nếu có giá trị
+        if (imageUrlInput.value) {
+            // Delay một chút để đảm bảo DOM đã sẵn sàng
+            setTimeout(function() {
+                if (typeof window.updatePreview === 'function') {
+                    window.updatePreview(imageUrlInput.value);
+                }
+            }, 100);
+        }
+    }
+    
+    // Kiểm tra và hiển thị ảnh ban đầu nếu có
+    const initialPreview = document.getElementById('previewImg');
+    if (initialPreview && initialPreview.src) {
+        console.log('Initial preview image src:', initialPreview.src);
+        
+        // Đảm bảo error handler được attach
+        initialPreview.onerror = function() {
+            console.error('Initial image load error:', this.src);
+            handleImageError(this);
+        };
+        
+        initialPreview.onload = function() {
+            console.log('Initial image loaded successfully:', this.src);
+            handleImageLoad(this);
+        };
+        
+        // Kiểm tra xem ảnh có tồn tại không bằng cách thử load lại
+        const testImg = new Image();
+        testImg.onload = function() {
+            console.log('Image exists and can be loaded:', initialPreview.src);
+        };
+        testImg.onerror = function() {
+            console.error('Image does not exist or cannot be loaded:', initialPreview.src);
+            // Không cần làm gì, error handler của previewImg sẽ xử lý
+        };
+        testImg.src = initialPreview.src;
+    }
+    
+    // Load và hiển thị gallery preview ban đầu
+    const galleryUrls = document.getElementById('galleryUrls');
+    const galleryPreview = document.getElementById('galleryPreview');
+    if (galleryUrls && galleryPreview && galleryUrls.value) {
+        const siteUrl = '<?php echo SITE_URL; ?>';
+        const urls = galleryUrls.value.split(',').map(u => u.trim()).filter(u => u);
+        
+        urls.forEach(function(url) {
+            if (!url) return;
+            
+            // Normalize URL
+            const normalizedUrl = normalizeImageUrl(url, siteUrl);
+            
+            // Tạo div cho mỗi ảnh
+            const imgDiv = document.createElement('div');
+            imgDiv.style.position = 'relative';
+            imgDiv.style.width = '100px';
+            imgDiv.style.height = '100px';
+            imgDiv.innerHTML = `
+                <img src="${normalizedUrl}" alt="Gallery" 
+                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid var(--admin-border);"
+                     onerror="this.parentElement.remove();">
+                <button type="button" class="btn btn-sm btn-danger" 
+                        style="position: absolute; top: -5px; right: -5px; border-radius: 50%; width: 24px; height: 24px; padding: 0;"
+                        onclick="removeGalleryImage(this, '${normalizedUrl}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            galleryPreview.appendChild(imgDiv);
+        });
     }
 });
 </script>

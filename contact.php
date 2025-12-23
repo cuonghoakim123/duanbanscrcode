@@ -11,12 +11,17 @@ $error = '';
 // Lấy thông tin template từ URL nếu có
 $template_name = isset($_GET['template']) ? urldecode($_GET['template']) : '';
 $template_id = isset($_GET['template_id']) ? (int)$_GET['template_id'] : 0;
+$product_id = isset($_GET['product_id']) ? (int)$_GET['product_id'] : 0;
+$product_name = isset($_GET['product_name']) ? urldecode($_GET['product_name']) : '';
 $auto_fill_subject = '';
 $auto_fill_message = '';
 
 if ($template_name) {
     $auto_fill_subject = 'Tư vấn mẫu giao diện: ' . $template_name;
     $auto_fill_message = "Xin chào,\n\nTôi quan tâm đến mẫu giao diện: " . $template_name . "\n\nVui lòng liên hệ với tôi để tư vấn chi tiết.\n\nCảm ơn!";
+} elseif ($product_name) {
+    $auto_fill_subject = 'Tư vấn sản phẩm: ' . $product_name;
+    $auto_fill_message = "Xin chào,\n\nTôi quan tâm đến sản phẩm: " . $product_name . "\n\nVui lòng liên hệ với tôi để tư vấn chi tiết.\n\nCảm ơn!";
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

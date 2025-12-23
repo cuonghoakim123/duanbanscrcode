@@ -1,39 +1,7 @@
 // Main JavaScript
 
-// Cập nhật số lượng giỏ hàng
-function updateCartCount() {
-    fetch(SITE_URL + '/cart_handler.php?action=count', {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) {
-                const count = data.count || 0;
-                cartCount.textContent = count;
-                // Ẩn badge nếu số lượng = 0
-                if (count > 0) {
-                    cartCount.style.display = 'block';
-                } else {
-                    cartCount.style.display = 'none';
-                }
-            }
-        }
-    })
-    .catch(error => {
-        console.log('Cart count error:', error);
-    });
-}
-
-// Load cart count khi trang load
+// Auto dismiss alerts
 document.addEventListener('DOMContentLoaded', function() {
-    // Kiểm tra nếu có element cart-count thì cập nhật (chỉ khi user đã đăng nhập)
-    const cartCountEl = document.getElementById('cart-count');
-    if (cartCountEl) {
-        updateCartCount();
-    }
-    
     // Auto dismiss alerts
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {

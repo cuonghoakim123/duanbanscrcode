@@ -62,18 +62,21 @@ $file_path = $upload_dir . $file_name;
 
 // Upload file
 if (move_uploaded_file($file['tmp_name'], $file_path)) {
-    // Trả về URL ảnh (relative to site root)
+    // Trả về URL ảnh với absolute path để tránh base tag issues
     if ($upload_type == 'template') {
-        $upload_path = '/uploads/templates/';
+        $image_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $file_name;
+        $upload_path = '/duanbanscrcode/uploads/templates/';
     } elseif ($upload_type == 'news') {
-        $upload_path = '/uploads/news/';
+        $image_url = 'http://localhost/duanbanscrcode/uploads/news/' . $file_name;
+        $upload_path = '/duanbanscrcode/uploads/news/';
     } elseif ($upload_type == 'services') {
-        $upload_path = '/uploads/services/';
+        $image_url = 'http://localhost/duanbanscrcode/uploads/services/' . $file_name;
+        $upload_path = '/duanbanscrcode/uploads/services/';
     } else {
-        $upload_path = '/uploads/products/';
+        $image_url = 'http://localhost/duanbanscrcode/uploads/products/' . $file_name;
+        $upload_path = '/duanbanscrcode/uploads/products/';
     }
     
-    $image_url = SITE_URL . $upload_path . $file_name;
     echo json_encode([
         'success' => true,
         'message' => 'Upload thành công',

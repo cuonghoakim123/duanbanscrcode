@@ -16,13 +16,16 @@
     border: none;
     box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
     cursor: pointer;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 24px;
     transition: all 0.3s ease;
     position: relative;
+    z-index: 10000;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .chatbot-button:hover {

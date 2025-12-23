@@ -52,13 +52,13 @@ define('FIREBASE_MESSAGING_SENDER_ID', '515720110095');
 define('FIREBASE_APP_ID', '1:515720110095:web:3d30a434c01051ab2b437a');
 define('FIREBASE_MEASUREMENT_ID', 'G-MLLT69QR5W'); // Optional - for Analytics
 
-// Cấu hình MoMo Payment
-define('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create');
-define('MOMO_PARTNER_CODE', 'YOUR_PARTNER_CODE');
-define('MOMO_ACCESS_KEY', 'YOUR_ACCESS_KEY');
-define('MOMO_SECRET_KEY', 'YOUR_SECRET_KEY');
-define('MOMO_RETURN_URL', SITE_URL . '/payment/momo_return.php');
-define('MOMO_NOTIFY_URL', SITE_URL . '/payment/momo_ipn.php');
+// Cấu hình MoMo Payment - Đã xóa (không sử dụng thanh toán)
+// define('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create');
+// define('MOMO_PARTNER_CODE', 'YOUR_PARTNER_CODE');
+// define('MOMO_ACCESS_KEY', 'YOUR_ACCESS_KEY');
+// define('MOMO_SECRET_KEY', 'YOUR_SECRET_KEY');
+// define('MOMO_RETURN_URL', SITE_URL . '/payment/momo_return.php');
+// define('MOMO_NOTIFY_URL', SITE_URL . '/payment/momo_ipn.php');
 
 // Cấu hình session
 if (session_status() === PHP_SESSION_NONE) {
@@ -92,9 +92,24 @@ function getProductPlaceholder($width = 300, $height = 200) {
     return getPlaceholderImage($width, $height, 'Product', 'e9ecef', '495057');
 }
 
-// Helper function: Lấy placeholder cho avatar
+// Helper function: Lấy placeholder cho avatar với icon user đẹp hơn
 function getAvatarPlaceholder($size = 150) {
-    return getPlaceholderImage($size, $size, 'Avatar', 'dee2e6', '6c757d');
+    // Tạo SVG đơn giản và đẹp hơn với gradient
+    $unique_id = 'avatar_' . md5($size . time());
+    $svg = '<?xml version="1.0" encoding="UTF-8"?>
+<svg width="' . $size . '" height="' . $size . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="grad' . $unique_id . '" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#e9ecef;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#dee2e6;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#grad' . $unique_id . ')"/>
+    <circle cx="50" cy="38" r="13" fill="#6c757d" opacity="0.8"/>
+    <path d="M 25 72 Q 25 62 50 62 Q 75 62 75 72 L 75 80 L 25 80 Z" fill="#6c757d" opacity="0.8"/>
+</svg>';
+    // Sử dụng base64 để đảm bảo tương thích tốt hơn
+    return 'data:image/svg+xml;base64,' . base64_encode($svg);
 }
 
 /**
@@ -115,5 +130,68 @@ function safe_substr($string, $start, $length = null) {
     } else {
         return $length !== null ? substr($string, $start, $length) : substr($string, $start);
     }
+}
+
+/**
+ * Helper function: Build template image URL từ giá trị trong database
+ * @param string $image_value Giá trị image từ database
+ * @param bool $add_cache_busting Có thêm cache busting không (dùng filemtime)
+ * @return string URL đầy đủ của ảnh
+ */
+function buildTemplateImageUrl($image_value, $add_cache_busting = false) {
+    if (empty($image_value)) {
+        return '';
+    }
+    
+    $image_value = trim($image_value);
+    $image_url = '';
+    
+    // Bước 1: Sửa /admin/uploads/ nếu có (sai)
+    $image_value = str_replace('/admin/uploads/templates/', '/uploads/templates/', $image_value);
+    $image_value = str_replace('admin/uploads/templates/', 'uploads/templates/', $image_value);
+    
+    // Bước 2: Nếu là URL external (http/https), giữ nguyên
+    if (preg_match('/^https?:\/\//', $image_value)) {
+        $image_url = $image_value;
+    }
+    // Bước 3: Nếu là URL từ SITE_URL, extract tên file
+    elseif (strpos($image_value, SITE_URL) === 0) {
+        // Loại bỏ SITE_URL
+        $temp = str_replace(SITE_URL, '', $image_value);
+        $temp = ltrim($temp, '/');
+        // Loại bỏ uploads/templates/ nếu có
+        if (strpos($temp, 'uploads/templates/') === 0) {
+            $filename = basename(str_replace('uploads/templates/', '', $temp));
+        } else {
+            $filename = basename($temp);
+        }
+        $image_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $filename;
+    }
+    // Bước 4: Nếu là đường dẫn relative hoặc chỉ tên file
+    else {
+        // Loại bỏ uploads/templates/ nếu có
+        $temp = $image_value;
+        if (strpos($temp, 'uploads/templates/') === 0) {
+            $temp = str_replace('uploads/templates/', '', $temp);
+        }
+        if (strpos($temp, '/uploads/templates/') === 0) {
+            $temp = str_replace('/uploads/templates/', '', $temp);
+        }
+        // Lấy chỉ tên file (loại bỏ mọi đường dẫn)
+        $filename = basename($temp);
+        // Build absolute URL - use absolute path to avoid base tag issues
+        $image_url = 'http://localhost/duanbanscrcode/uploads/templates/' . $filename;
+    }
+    
+    // Thêm cache busting nếu được yêu cầu
+    if ($add_cache_busting && $image_url && !preg_match('/^https?:\/\//', $image_url)) {
+        $file_path = dirname(__DIR__) . '/uploads/templates/' . basename($image_url);
+        if (file_exists($file_path)) {
+            $file_time = filemtime($file_path);
+            $image_url .= '?v=' . $file_time;
+        }
+    }
+    
+    return $image_url;
 }
 ?>

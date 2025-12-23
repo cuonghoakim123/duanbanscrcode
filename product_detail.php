@@ -98,32 +98,16 @@ include 'includes/header.php';
                 <?php endif; ?>
             </div>
             
-            <?php if($product['quantity'] > 0): ?>
-                <div class="mb-4">
-                    <div class="input-group" style="max-width: 200px;">
-                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="<?php echo $product['quantity']; ?>">
-                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="d-grid gap-2 d-md-flex">
-                    <button class="btn btn-primary btn-lg" onclick="addToCart(<?php echo $product_id; ?>)">
-                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ hàng
-                    </button>
-                    <button class="btn btn-danger btn-lg" onclick="buyNow(<?php echo $product_id; ?>)">
-                        <i class="fas fa-bolt"></i> Mua ngay
-                    </button>
-                </div>
-            <?php else: ?>
-                <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="fas fa-times"></i> Sản phẩm hết hàng
+            <!-- Liên hệ và Chat -->
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="<?php echo SITE_URL; ?>/contact.php?product_id=<?php echo $product_id; ?>&product_name=<?php echo urlencode($product['name']); ?>" 
+                   class="btn btn-outline-primary btn-lg flex-fill">
+                    <i class="fas fa-phone-alt"></i> Liên hệ ngay
+                </a>
+                <button class="btn btn-success btn-lg flex-fill" onclick="openAdminChat(<?php echo $product_id; ?>, '<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>')">
+                    <i class="fas fa-comments"></i> Chat với admin
                 </button>
-            <?php endif; ?>
+            </div>
             
             <!-- Product Features -->
             <div class="mt-4 p-3 bg-light rounded">
@@ -194,68 +178,23 @@ include 'includes/header.php';
 </div>
 
 <script>
-function changeQuantity(change) {
-    const input = document.getElementById('quantity');
-    const newValue = parseInt(input.value) + change;
-    const max = parseInt(input.max);
-    
-    if (newValue >= 1 && newValue <= max) {
-        input.value = newValue;
+// Mở chat với admin
+function openAdminChat(productId, productName) {
+    // Kiểm tra xem script đã load chưa
+    if (typeof initAdminChat === 'function') {
+        initAdminChat(productId, productName);
+    } else {
+        // Load script và sau đó mở chat
+        const script = document.createElement('script');
+        script.src = '<?php echo SITE_URL; ?>/assets/js/admin_chat.js';
+        script.onload = function() {
+            initAdminChat(productId, productName);
+        };
+        document.head.appendChild(script);
     }
 }
-
-function addToCart(productId) {
-    <?php if(!isset($_SESSION['user_id'])): ?>
-        alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
-        window.location.href = '<?php echo SITE_URL; ?>/auth/login.php';
-        return;
-    <?php endif; ?>
-    
-    const quantity = document.getElementById('quantity').value;
-    
-    fetch('<?php echo SITE_URL; ?>/cart_handler.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'action=add&product_id=' + productId + '&quantity=' + quantity
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Cập nhật số lượng giỏ hàng
-            if (data.cart_count !== undefined) {
-                const cartCount = document.getElementById('cart-count');
-                if (cartCount) {
-                    cartCount.textContent = data.cart_count;
-                    cartCount.style.display = data.cart_count > 0 ? 'block' : 'none';
-                }
-            } else {
-                updateCartCount();
-            }
-            
-            // Hiển thị thông báo thành công
-            if (typeof showToast === 'function') {
-                showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
-            } else {
-                alert('Đã thêm sản phẩm vào giỏ hàng!');
-            }
-        } else {
-            alert(data.message || 'Có lỗi xảy ra!');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra khi thêm vào giỏ hàng!');
-    });
-}
-
-function buyNow(productId) {
-    addToCart(productId);
-    setTimeout(() => {
-        window.location.href = '<?php echo SITE_URL; ?>/cart.php';
-    }, 500);
-}
 </script>
+
+<script src="<?php echo SITE_URL; ?>/assets/js/admin_chat.js"></script>
 
 <?php include 'includes/footer.php'; ?>

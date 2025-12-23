@@ -32,25 +32,22 @@ if (empty($base_path) || $base_path == '\\' || $base_path == '.' || $base_path =
     }
 }
 
-// Tạo đường dẫn CSS - dùng cả absolute (từ SITE_URL và tính toán) và relative
+// Tạo đường dẫn CSS - dùng absolute URLs để tránh vấn đề base tag
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$admin_css_absolute_1 = SITE_URL . '/admin/assets/css/admin.css?v=' . $css_version;
-$admin_css_absolute_2 = $protocol . $host . $base_path . '/admin/assets/css/admin.css?v=' . $css_version;
-$admin_css_relative = 'assets/css/admin.css?v=' . $css_version;
+
+// Sử dụng hard-coded absolute URL để tránh path confusion
+$admin_css_path = 'http://localhost/duanbanscrcode/admin/assets/css/admin.css?v=' . $css_version;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="<?php echo $protocol . $host . $base_path . '/admin/'; ?>">
     <title><?php echo isset($title) ? $title . ' - Admin' : 'Admin Panel'; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo $admin_css_absolute_1; ?>">
-    <link rel="stylesheet" href="<?php echo $admin_css_absolute_2; ?>">
-    <link rel="stylesheet" href="<?php echo $admin_css_relative; ?>">
+    <link rel="stylesheet" href="<?php echo $admin_css_path; ?>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -82,10 +79,6 @@ $admin_css_relative = 'assets/css/admin.css?v=' . $css_version;
                 <i class="fas fa-tags"></i>
                 <span>Danh mục</span>
             </a>
-            <a href="orders.php" class="nav-link <?php echo $current_page == 'orders.php' ? 'active' : ''; ?>">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Đơn hàng</span>
-            </a>
             <a href="users.php" class="nav-link <?php echo $current_page == 'users.php' ? 'active' : ''; ?>">
                 <i class="fas fa-users"></i>
                 <span>Người dùng</span>
@@ -97,6 +90,10 @@ $admin_css_relative = 'assets/css/admin.css?v=' . $css_version;
             <a href="contacts.php" class="nav-link <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>">
                 <i class="fas fa-envelope"></i>
                 <span>Liên hệ</span>
+            </a>
+            <a href="chats.php" class="nav-link <?php echo $current_page == 'chats.php' ? 'active' : ''; ?>">
+                <i class="fas fa-comments"></i>
+                <span>Chat với khách hàng</span>
             </a>
             <a href="templates.php" class="nav-link <?php echo $current_page == 'templates.php' || $current_page == 'template_add.php' || $current_page == 'template_edit.php' ? 'active' : ''; ?>">
                 <i class="fas fa-palette"></i>

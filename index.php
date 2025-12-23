@@ -117,6 +117,7 @@ foreach($categories_config as $slug => $config) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/landing.css">
+    <link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/chatbot.css">
 </head>
 <body>
 
@@ -202,18 +203,27 @@ foreach($categories_config as $slug => $config) {
                         </ul>
                     </li>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="<?php echo SITE_URL; ?>/cart.php">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" id="cart-count">0</span>
-                            </a>
-                        </li>
+                        <!-- Đã xóa giỏ hàng -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <?php if(isset($_SESSION['user_avatar']) && !empty($_SESSION['user_avatar'])): ?>
-                                    <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                <?php 
+                                // Lấy avatar từ session hoặc hiển thị placeholder
+                                $user_avatar = isset($_SESSION['user_avatar']) && !empty($_SESSION['user_avatar']) && $_SESSION['user_avatar'] !== 'null' ? $_SESSION['user_avatar'] : null;
+                                
+                                // Đảm bảo getAvatarPlaceholder được gọi đúng cách
+                                $placeholder_url = getAvatarPlaceholder(32);
+                                
+                                if ($user_avatar && $user_avatar !== 'null'): ?>
+                                    <img src="<?php echo htmlspecialchars($user_avatar); ?>" 
+                                         alt="Avatar" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e0e0e0; background: #f0f0f0; display: block;"
+                                         onerror="this.onerror=null; this.src='<?php echo htmlspecialchars($placeholder_url); ?>';">
                                 <?php else: ?>
-                                    <i class="fas fa-user-circle me-2"></i>
+                                    <img src="<?php echo htmlspecialchars($placeholder_url); ?>" 
+                                         alt="Avatar" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e0e0e0; background: #f0f0f0; display: block;">
                                 <?php endif; ?>
                                 <span><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
                             </a>
@@ -222,7 +232,7 @@ foreach($categories_config as $slug => $config) {
                                     <small class="text-muted"><?php echo htmlspecialchars($_SESSION['user_email'] ?? ''); ?></small>
                                 </li>
                                 <li><a class="dropdown-item" href="<?php echo SITE_URL; ?>/profile.php"><i class="fas fa-user"></i> <?php echo lang('nav_profile'); ?></a></li>
-                                <li><a class="dropdown-item" href="<?php echo SITE_URL; ?>/orders.php"><i class="fas fa-box"></i> <?php echo lang('nav_orders'); ?></a></li>
+                                <!-- Đã xóa đơn hàng -->
                                 <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-primary" href="<?php echo SITE_URL; ?>/admin"><i class="fas fa-tachometer-alt"></i> <?php echo lang('nav_admin'); ?></a></li>
@@ -263,7 +273,7 @@ foreach($categories_config as $slug => $config) {
                 <p class="lead mb-4"><?php echo lang('hero_subtitle'); ?> <strong style="color: #d32f2f;">999k</strong></p>
                 <div class="d-flex gap-3 mb-4">
                     <a href="tel:0939445228" class="btn btn-primary btn-lg">
-                        <i class="fas fa-phone-alt"></i> <?php echo lang('hero_cta'); ?> <strong>0939 445 228</strong>
+                        <i class="fas fa-phone-alt"></i> <?php echo lang('hero_cta'); ?> <strong>0355 999 141</strong>
                     </a>
                 </div>
                 <p class="text-muted"><?php echo lang('hero_desc'); ?></p>
@@ -1180,9 +1190,59 @@ foreach($categories_config as $slug => $config) {
     <i class="fas fa-arrow-up"></i>
 </a>
 
+<!-- Chatbot -->
+<div class="chatbot-container">
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chatbot-header-text">
+                    <h4><?php echo lang('chatbot_title'); ?></h4>
+                    <p><?php echo lang('chatbot_subtitle'); ?></p>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="welcome-message">
+                <h5>👋 <?php echo lang('chatbot_welcome'); ?></h5>
+                <p><?php echo lang('chatbot_intro'); ?></p>
+                <ul style="text-align: left; display: inline-block; margin-top: 10px;">
+                    <li><?php echo lang('chatbot_help_1'); ?></li>
+                    <li><?php echo lang('chatbot_help_2'); ?></li>
+                    <li><?php echo lang('chatbot_help_3'); ?></li>
+                    <li><?php echo lang('chatbot_help_4'); ?></li>
+                </ul>
+                <p style="margin-top: 15px;"><?php echo lang('chatbot_start'); ?></p>
+            </div>
+        </div>
+        <div class="chatbot-input-container">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="<?php echo lang('common_chatbot_placeholder'); ?>" onkeypress="handleChatbotKeyPress(event)">
+            <button class="chatbot-send" onclick="sendChatbotMessage()" id="chatbotSendBtn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    <button class="chatbot-button" onclick="toggleChatbot()" id="chatbotButton">
+        <i class="fas fa-comments"></i>
+    </button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+<script>
+// Define SITE_URL for JavaScript (must be before main.js)
+const SITE_URL = '<?php echo SITE_URL; ?>';
+</script>
 <script src="<?php echo SITE_URL; ?>/assets/js/main.js" defer></script>
+<script>
+    const CHATBOT_API_URL = '<?php echo SITE_URL; ?>/api/chatbot.php';
+</script>
+<script src="<?php echo SITE_URL; ?>/assets/js/chatbot.js"></script>
 <style>
 /* Reviews Section Styles */
 .reviews-section {
@@ -1554,30 +1614,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Update cart count
-    function updateCartCount() {
-        <?php if(isset($_SESSION['user_id'])): ?>
-        fetch('<?php echo SITE_URL; ?>/cart_handler.php?action=count')
-            .then(response => response.json())
-            .then(data => {
-                const cartCountEl = document.getElementById('cart-count');
-                if(cartCountEl && data.count) {
-                    cartCountEl.textContent = data.count;
-                }
-            })
-            .catch(error => console.log('Cart count error:', error));
-        <?php endif; ?>
-    }
-    
-    // Call updateCartCount when page loads
-    <?php if(isset($_SESSION['user_id'])): ?>
-    updateCartCount();
-    <?php endif; ?>
+    // Đã xóa chức năng giỏ hàng
     
     // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            // Bỏ qua nếu href chỉ là "#" hoặc rỗng
+            if (!href || href === '#' || href.length <= 1) {
+                return;
+            }
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(href);
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -2143,53 +2191,3 @@ function toggleFaq(num) {
 </script>
 </body>
 </html>
-
-	<script>(function(html){html.className = html.className.replace(/\bno-js\b/,'js')})(document.documentElement);</script>
-	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
-	
-	<!-- Chatbot -->
-	<link rel="stylesheet" href="<?php echo SITE_URL; ?>/assets/css/chatbot.css">
-	<div class="chatbot-container">
-		<div class="chatbot-window" id="chatbotWindow">
-			<div class="chatbot-header">
-				<div class="chatbot-header-info">
-					<div class="chatbot-avatar">
-						<i class="fas fa-robot"></i>
-					</div>
-					<div class="chatbot-header-text">
-						<h4><?php echo lang('chatbot_title'); ?></h4>
-						<p><?php echo lang('chatbot_subtitle'); ?></p>
-					</div>
-				</div>
-				<button class="chatbot-close" onclick="toggleChatbot()">
-					<i class="fas fa-times"></i>
-				</button>
-			</div>
-			<div class="chatbot-messages" id="chatbotMessages">
-				<div class="welcome-message">
-					<h5>👋 <?php echo lang('chatbot_welcome'); ?></h5>
-					<p><?php echo lang('chatbot_intro'); ?></p>
-					<ul style="text-align: left; display: inline-block; margin-top: 10px;">
-						<li><?php echo lang('chatbot_help_1'); ?></li>
-						<li><?php echo lang('chatbot_help_2'); ?></li>
-						<li><?php echo lang('chatbot_help_3'); ?></li>
-						<li><?php echo lang('chatbot_help_4'); ?></li>
-					</ul>
-					<p style="margin-top: 15px;"><?php echo lang('chatbot_start'); ?></p>
-				</div>
-			</div>
-			<div class="chatbot-input-container">
-				<input type="text" class="chatbot-input" id="chatbotInput" placeholder="<?php echo lang('common_chatbot_placeholder'); ?>" onkeypress="handleChatbotKeyPress(event)">
-				<button class="chatbot-send" onclick="sendChatbotMessage()" id="chatbotSendBtn">
-					<i class="fas fa-paper-plane"></i>
-				</button>
-			</div>
-		</div>
-		<button class="chatbot-button" onclick="toggleChatbot()" id="chatbotButton">
-			<i class="fas fa-comments"></i>
-		</button>
-	</div>
-	<script>
-		const CHATBOT_API_URL = '<?php echo SITE_URL; ?>/api/chatbot.php';
-	</script>
-	<script src="<?php echo SITE_URL; ?>/assets/js/chatbot.js"></script>

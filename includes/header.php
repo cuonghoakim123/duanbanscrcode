@@ -28,16 +28,30 @@
             if ($stmt->rowCount() > 0) {
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (!empty($user['avatar'])) {
-                    $avatar_url = $user['avatar'];
+                    $avatar_url = trim($user['avatar']);
                     // Xử lý đường dẫn avatar
                     if (preg_match('/^https?:\/\//', $avatar_url)) {
+                        // URL đầy đủ, giữ nguyên
                         $_SESSION['user_avatar'] = $avatar_url;
                     } elseif (preg_match('/^\/uploads\//', $avatar_url)) {
+                        // Đường dẫn tuyệt đối từ root
                         $_SESSION['user_avatar'] = SITE_URL . $avatar_url;
                     } elseif (strpos($avatar_url, 'uploads/') !== false) {
-                        $_SESSION['user_avatar'] = SITE_URL . '/' . ltrim($avatar_url, '/');
+                        // Chứa uploads/ nhưng không bắt đầu bằng /
+                        if (strpos($avatar_url, SITE_URL) === false) {
+                            $_SESSION['user_avatar'] = SITE_URL . '/' . ltrim($avatar_url, '/');
+                        } else {
+                            $_SESSION['user_avatar'] = $avatar_url;
+                        }
                     } else {
-                        $_SESSION['user_avatar'] = SITE_URL . '/uploads/users/' . basename($avatar_url);
+                        // Chỉ là tên file, kiểm tra xem file có tồn tại không
+                        $possible_path = __DIR__ . '/../uploads/users/' . basename($avatar_url);
+                        if (file_exists($possible_path)) {
+                            $_SESSION['user_avatar'] = SITE_URL . '/uploads/users/' . basename($avatar_url);
+                        } else {
+                            // File không tồn tại, dùng null để hiển thị placeholder
+                            $_SESSION['user_avatar'] = null;
+                        }
                     }
                 } else {
                     $_SESSION['user_avatar'] = null;
@@ -87,26 +101,32 @@
                         <a class="nav-link" href="<?php echo SITE_URL; ?>/contact.php"><i class="fas fa-phone-alt"></i> Liên hệ</a>
                     </li>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="<?php echo SITE_URL; ?>/cart.php">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" id="cart-count">0</span>
-                            </a>
-                        </li>
+                        <!-- Đã xóa giỏ hàng -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <?php 
-                                // Lấy avatar từ session hoặc hiển thị icon mặc định
+                                // Lấy avatar từ session hoặc hiển thị placeholder
                                 $user_avatar = isset($_SESSION['user_avatar']) && !empty($_SESSION['user_avatar']) && $_SESSION['user_avatar'] !== 'null' ? $_SESSION['user_avatar'] : null;
-                                if ($user_avatar): ?>
+                                
+                                // Load hàm getAvatarPlaceholder nếu chưa có
+                                if (!function_exists('getAvatarPlaceholder')) {
+                                    require_once __DIR__ . '/../config/config.php';
+                                }
+                                
+                                // Đảm bảo getAvatarPlaceholder được gọi đúng cách
+                                $placeholder_url = getAvatarPlaceholder(32);
+                                
+                                if ($user_avatar && $user_avatar !== 'null'): ?>
                                     <img src="<?php echo htmlspecialchars($user_avatar); ?>" 
                                          alt="Avatar" 
                                          class="rounded-circle me-2" 
-                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e0e0e0;"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                                    <i class="fas fa-user-circle me-2" style="font-size: 32px; color: #6c757d; display: none;"></i>
+                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e0e0e0; background: #f0f0f0; display: block;"
+                                         onerror="this.onerror=null; this.src='<?php echo htmlspecialchars($placeholder_url); ?>';">
                                 <?php else: ?>
-                                    <i class="fas fa-user-circle me-2" style="font-size: 32px; color: #6c757d;"></i>
+                                    <img src="<?php echo htmlspecialchars($placeholder_url); ?>" 
+                                         alt="Avatar" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e0e0e0; background: #f0f0f0; display: block;">
                                 <?php endif; ?>
                                 <span><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
                             </a>
@@ -115,10 +135,11 @@
                                     <small class="text-muted"><?php echo $_SESSION['user_email']; ?></small>
                                 </li>
                                 <li><a class="dropdown-item" href="<?php echo SITE_URL; ?>/profile.php"><i class="fas fa-user"></i> Thông tin cá nhân</a></li>
-                                <li><a class="dropdown-item" href="<?php echo SITE_URL; ?>/orders.php"><i class="fas fa-box"></i> Đơn hàng của tôi</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="initAdminChat()"><i class="fas fa-comments"></i> Chat với admin</a></li>
                                 <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-primary" href="<?php echo SITE_URL; ?>/admin"><i class="fas fa-tachometer-alt"></i> Quản trị</a></li>
+                                    <li><a class="dropdown-item text-primary" href="<?php echo SITE_URL; ?>/admin/chats.php"><i class="fas fa-comments"></i> Quản lý chat</a></li>
                                 <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="<?php echo SITE_URL; ?>/auth/logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>

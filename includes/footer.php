@@ -244,6 +244,7 @@
     const SITE_URL = '<?php echo SITE_URL; ?>';
     </script>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
+    <script src="<?php echo asset_url('assets/js/admin_chat.js'); ?>"></script>
     
     <script>
     
@@ -272,21 +273,7 @@
         });
     });
     
-    // Update cart count
-    function updateCartCount() {
-        fetch(SITE_URL + '/cart_handler.php?action=count')
-            .then(response => response.json())
-            .then(data => {
-                if(data.count) {
-                    document.getElementById('cart-count').textContent = data.count;
-                }
-            })
-            .catch(error => console.log(error));
-    }
-    
-    <?php if(isset($_SESSION['user_id'])): ?>
-    updateCartCount();
-    <?php endif; ?>
+    // Đã xóa chức năng giỏ hàng
     </script>
     
     <?php if(isset($extra_js)) echo $extra_js; ?>

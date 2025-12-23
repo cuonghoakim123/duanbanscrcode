@@ -26,6 +26,15 @@ try {
 $success = '';
 $error = '';
 
+// Xử lý thông báo từ URL
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] == 'updated') {
+        $success = 'Cập nhật mẫu giao diện thành công!';
+    } elseif ($_GET['msg'] == 'added') {
+        $success = 'Thêm mẫu giao diện thành công!';
+    }
+}
+
 // Xử lý xóa template
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
@@ -56,6 +65,56 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
         $success = 'Cập nhật trạng thái thành công!';
     } else {
         $error = 'Có lỗi xảy ra!';
+    }
+}
+
+// Xử lý cập nhật hình ảnh
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_image'])) {
+    $template_id = (int)$_POST['template_id'];
+    $new_image = trim($_POST['new_image'] ?? '');
+    
+    // Xử lý image: chỉ lưu tên file vào database
+    if (!empty($new_image)) {
+        // Sửa đường dẫn sai nếu có /admin/uploads/templates/
+        $new_image = str_replace('/admin/uploads/templates/', '/uploads/templates/', $new_image);
+        $new_image = str_replace('admin/uploads/templates/', 'uploads/templates/', $new_image);
+        
+        // Loại bỏ SITE_URL nếu có
+        if (strpos($new_image, SITE_URL) === 0) {
+            $new_image = str_replace(SITE_URL, '', $new_image);
+            $new_image = ltrim($new_image, '/');
+        }
+        
+        // Loại bỏ /uploads/templates/ nếu có
+        if (strpos($new_image, 'uploads/templates/') === 0) {
+            $new_image = str_replace('uploads/templates/', '', $new_image);
+        }
+        if (strpos($new_image, '/uploads/templates/') === 0) {
+            $new_image = str_replace('/uploads/templates/', '', $new_image);
+        }
+        
+        // Nếu là URL external, extract tên file từ path
+        if (preg_match('/^https?:\/\//', $new_image)) {
+            $parsed = parse_url($new_image);
+            $new_image = isset($parsed['path']) ? basename($parsed['path']) : basename($new_image);
+        }
+        
+        // Đảm bảo chỉ lấy tên file
+        $new_image = basename($new_image);
+        
+        // Cập nhật image trong database
+        $query = "UPDATE templates SET image = :image WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':image', $new_image);
+        $stmt->bindParam(':id', $template_id);
+        
+        if ($stmt->execute()) {
+            $success = 'Cập nhật hình ảnh thành công!';
+        } else {
+            $error = 'Có lỗi xảy ra khi cập nhật hình ảnh!';
+        }
+    } else {
+        $error = 'Vui lòng chọn hình ảnh!';
     }
 }
 
@@ -99,10 +158,10 @@ $count_stmt->execute();
 $total = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
 $total_pages = ceil($total / $limit);
 
-// Lấy danh sách templates
+// Lấy danh sách templates - ORDER BY updated_at để hiển thị mới nhất trước
 $query = "SELECT * FROM templates 
           $where_clause
-          ORDER BY created_at DESC 
+          ORDER BY updated_at DESC, created_at DESC 
           LIMIT :limit OFFSET :offset";
 $stmt = $db->prepare($query);
 foreach ($params as $key => $value) {
@@ -219,20 +278,20 @@ include 'includes/admin_header.php';
                             <tr>
                                 <td><?php echo $template['id']; ?></td>
                                 <td>
-                                    <?php if ($template['image']): ?>
-                                        <?php 
-                                        // Kiểm tra nếu là URL đầy đủ hoặc chỉ là tên file
-                                        $image_url = $template['image'];
-                                        if (!preg_match('/^https?:\/\//', $image_url) && !preg_match('/^\//', $image_url)) {
-                                            $image_url = SITE_URL . '/uploads/templates/' . $image_url;
-                                        }
-                                        ?>
+                                    <?php 
+                                    // Sử dụng helper function để build URL ảnh (không cần cache busting trong admin)
+                                    $image_url = buildTemplateImageUrl($template['image'] ?? '', false);
+                                    $image_value_db = $template['image'] ?? '';
+                                    
+                                    if ($image_url): 
+                                    ?>
                                         <img src="<?php echo htmlspecialchars($image_url); ?>" 
                                              alt="<?php echo htmlspecialchars($template['name']); ?>" 
                                              class="template-thumb" 
-                                             style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                             style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;"
+                                             onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'width: 60px; height: 40px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;\' title=\'Image: <?php echo htmlspecialchars(addslashes($image_value_db)); ?>\'><i class=\'fas fa-image text-muted\'></i></div>';">
                                     <?php else: ?>
-                                        <div style="width: 60px; height: 40px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 60px; height: 40px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;" title="No image in database">
                                             <i class="fas fa-image text-muted"></i>
                                         </div>
                                     <?php endif; ?>
@@ -276,17 +335,22 @@ include 'includes/admin_header.php';
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="template_edit.php?id=<?php echo $template['id']; ?>" class="btn-admin btn-admin-primary btn-admin-sm">
+                                        <a href="template_edit.php?id=<?php echo $template['id']; ?>" class="btn-admin btn-admin-primary btn-admin-sm" title="Sửa">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <button type="button" class="btn-admin btn-admin-info btn-admin-sm" 
                                                 data-bs-toggle="modal" 
-                                                data-bs-target="#statusModal<?php echo $template['id']; ?>">
+                                                data-bs-target="#statusModal<?php echo $template['id']; ?>" title="Cài đặt">
                                             <i class="fas fa-cog"></i>
+                                        </button>
+                                        <button type="button" class="btn-admin btn-admin-warning btn-admin-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#imageModal<?php echo $template['id']; ?>" title="Cập nhật hình ảnh">
+                                            <i class="fas fa-image"></i>
                                         </button>
                                         <a href="?delete=<?php echo $template['id']; ?>" 
                                            class="btn-admin btn-admin-danger btn-admin-sm"
-                                           onclick="return confirm('Xóa mẫu giao diện này?');">
+                                           onclick="return confirm('Xóa mẫu giao diện này?');" title="Xóa">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -328,6 +392,72 @@ include 'includes/admin_header.php';
                                                 <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Đóng</button>
                                             </div>
                                         </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Image Update Modal -->
+                            <div class="modal fade" id="imageModal<?php echo $template['id']; ?>" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Cập nhật hình ảnh: <?php echo htmlspecialchars($template['name']); ?></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Hiển thị ảnh hiện tại -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Hình ảnh hiện tại:</label>
+                                                <div class="text-center">
+                                                    <?php 
+                                                    $current_image_url = buildTemplateImageUrl($template['image'] ?? '', false);
+                                                    if ($current_image_url): 
+                                                    ?>
+                                                        <img src="<?php echo htmlspecialchars($current_image_url); ?>" 
+                                                             alt="Current image" 
+                                                             style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;"
+                                                             onerror="this.parentElement.innerHTML='<div class=\'text-muted\'><i class=\'fas fa-image\'></i> Không thể tải ảnh hiện tại</div>';">
+                                                    <?php else: ?>
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-image"></i> Chưa có ảnh
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+
+                                            <!-- Upload ảnh mới -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Chọn ảnh mới:</label>
+                                                <div class="image-upload-area">
+                                                    <input type="file" class="form-control" id="imageUpload_<?php echo $template['id']; ?>" accept="image/*" style="padding: 8px;">
+                                                    <small class="text-muted d-block mt-2">Chấp nhận JPG, PNG, GIF, WebP - Tối đa 5MB<br>Kéo thả file vào đây hoặc click để chọn</small>
+                                                </div>
+                                            </div>
+
+                                            <!-- Preview ảnh mới -->
+                                            <div class="mb-3" id="imagePreview_<?php echo $template['id']; ?>" style="display: none;">
+                                                <label class="form-label">Xem trước:</label>
+                                                <div class="text-center">
+                                                    <img id="previewImg_<?php echo $template['id']; ?>" src="" alt="Preview" 
+                                                         style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;">
+                                                </div>
+                                            </div>
+
+                                            <!-- Form cập nhật -->
+                                            <form method="POST" id="imageForm_<?php echo $template['id']; ?>">
+                                                <input type="hidden" name="template_id" value="<?php echo $template['id']; ?>">
+                                                <input type="hidden" name="new_image" id="newImagePath_<?php echo $template['id']; ?>" value="">
+                                                
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <button type="button" class="btn-admin btn-admin-primary" 
+                                                            onclick="uploadTemplateImage(<?php echo $template['id']; ?>)"
+                                                            id="uploadBtn_<?php echo $template['id']; ?>">
+                                                        <i class="fas fa-cloud-upload-alt"></i> Upload & Cập nhật
+                                                    </button>
+                                                    <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Đóng</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -380,7 +510,209 @@ include 'includes/admin_header.php';
 .template-thumb {
     border: 1px solid #dee2e6;
 }
+.btn-admin.btn-admin-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+.btn-admin.btn-admin-warning:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+    color: white;
+}
+.modal-body .text-center img {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.form-control:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25);
+}
+.image-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+.image-upload-area:hover {
+    border-color: #4299e1;
+}
+.image-upload-area.dragover {
+    border-color: #4299e1;
+    background-color: rgba(66, 153, 225, 0.05);
+}
 </style>
+
+<script>
+// Preview image when selected
+document.addEventListener('DOMContentLoaded', function() {
+    // Thiết lập preview cho tất cả các input file
+    const fileInputs = document.querySelectorAll('input[type="file"][id^="imageUpload_"]');
+    fileInputs.forEach(function(input) {
+        const templateId = input.id.split('_')[1];
+        input.addEventListener('change', function() {
+            previewImage(this, templateId);
+        });
+    });
+
+    // Add drag and drop functionality
+    fileInputs.forEach(function(input) {
+        const templateId = input.id.split('_')[1];
+        const uploadArea = input.parentElement;
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                input.files = files;
+                previewImage(input, templateId);
+            }
+        });
+    });
+});
+
+function previewImage(input, templateId) {
+    const preview = document.getElementById('imagePreview_' + templateId);
+    const previewImg = document.getElementById('previewImg_' + templateId);
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WebP)!');
+            input.value = '';
+            preview.style.display = 'none';
+            return;
+        }
+        
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File quá lớn! Kích thước tối đa: 5MB');
+            input.value = '';
+            preview.style.display = 'none';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+function uploadTemplateImage(templateId) {
+    const fileInput = document.getElementById('imageUpload_' + templateId);
+    const uploadBtn = document.getElementById('uploadBtn_' + templateId);
+    const newImagePath = document.getElementById('newImagePath_' + templateId);
+    
+    if (!fileInput.files || !fileInput.files[0]) {
+        alert('Vui lòng chọn file ảnh!');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WebP)!');
+        return;
+    }
+    
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File quá lớn! Kích thước tối đa: 5MB');
+        return;
+    }
+    
+    // Disable button and show loading
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang upload...';
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('upload_type', 'template');
+    
+    // Upload file
+    fetch('upload_image.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Set the image path for form submission
+            newImagePath.value = data.filename; // Chỉ lưu filename
+            
+            // Submit form để cập nhật database
+            const form = document.getElementById('imageForm_' + templateId);
+            const updateFormData = new FormData(form);
+            updateFormData.append('update_image', '1');
+            
+            return fetch(window.location.href, {
+                method: 'POST',
+                body: updateFormData
+            });
+        } else {
+            throw new Error(data.message || 'Upload failed');
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Success - reload page to show updated image
+            alert('Cập nhật hình ảnh thành công!');
+            window.location.reload();
+        } else {
+            throw new Error('Failed to update database');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra: ' + error.message);
+    })
+    .finally(() => {
+        // Re-enable button
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload & Cập nhật';
+    });
+}
+
+// Show success message if redirected with success parameter
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('image_updated') === '1') {
+        // Scroll to top and highlight success
+        window.scrollTo(0, 0);
+        
+        // You can add any additional success handling here
+        setTimeout(() => {
+            // Clean URL
+            if (window.history.replaceState) {
+                const newUrl = window.location.href.replace(/[?&]image_updated=1/, '');
+                window.history.replaceState(null, '', newUrl);
+            }
+        }, 1000);
+    }
+});
+</script>
 
 <?php include 'includes/admin_footer.php'; ?>
 

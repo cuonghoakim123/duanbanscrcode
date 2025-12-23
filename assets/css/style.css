@@ -6,6 +6,21 @@
     --danger-color: #dc3545;
 }
 
+/* Avatar Styles */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+    background: #f0f0f0;
+    display: block;
+    flex-shrink: 0;
+}
+
+.user-avatar.placeholder {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+}
+
 body {
     font-family: 'Roboto', sans-serif;
 }

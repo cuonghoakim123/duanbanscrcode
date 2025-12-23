@@ -14,22 +14,117 @@ $db = $database->getConnection();
 $success = '';
 $error = '';
 
-// Xử lý cập nhật trạng thái
+// Xử lý thêm user mới
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_user'])) {
+    $fullname = trim($_POST['fullname'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $role = $_POST['role'] ?? 'user';
+    $status = $_POST['status'] ?? 'active';
+    
+    // Validation
+    if (empty($fullname) || empty($email) || empty($password)) {
+        $error = 'Vui lòng điền đầy đủ thông tin bắt buộc!';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Email không hợp lệ!';
+    } elseif (strlen($password) < 6) {
+        $error = 'Mật khẩu phải có ít nhất 6 ký tự!';
+    } else {
+        // Kiểm tra email đã tồn tại
+        $check_query = "SELECT id FROM users WHERE email = :email";
+        $check_stmt = $db->prepare($check_query);
+        $check_stmt->bindParam(':email', $email);
+        $check_stmt->execute();
+        
+        if ($check_stmt->rowCount() > 0) {
+            $error = 'Email đã tồn tại!';
+        } else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            
+            $query = "INSERT INTO users (fullname, email, phone, address, password, role, status, created_at) 
+                      VALUES (:fullname, :email, :phone, :address, :password, :role, :status, NOW())";
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':fullname', $fullname);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':phone', $phone);
+            $stmt->bindParam(':address', $address);
+            $stmt->bindParam(':password', $hashed_password);
+            $stmt->bindParam(':role', $role);
+            $stmt->bindParam(':status', $status);
+            
+            if ($stmt->execute()) {
+                $success = 'Thêm người dùng thành công!';
+            } else {
+                $error = 'Có lỗi xảy ra khi thêm người dùng!';
+            }
+        }
+    }
+}
+
+// Xử lý cập nhật user
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_user'])) {
     $user_id = (int)$_POST['user_id'];
-    $status = $_POST['status'];
-    $role = $_POST['role'];
+    $fullname = trim($_POST['fullname'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $role = $_POST['role'] ?? 'user';
+    $status = $_POST['status'] ?? 'active';
+    $password = $_POST['password'] ?? '';
     
-    $query = "UPDATE users SET status = :status, role = :role WHERE id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':status', $status);
-    $stmt->bindParam(':role', $role);
-    $stmt->bindParam(':id', $user_id);
-    
-    if ($stmt->execute()) {
-        $success = 'Cập nhật người dùng thành công!';
+    // Validation
+    if (empty($fullname) || empty($email)) {
+        $error = 'Vui lòng điền đầy đủ thông tin bắt buộc!';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Email không hợp lệ!';
     } else {
-        $error = 'Có lỗi xảy ra!';
+        // Kiểm tra email đã tồn tại (trừ user hiện tại)
+        $check_query = "SELECT id FROM users WHERE email = :email AND id != :id";
+        $check_stmt = $db->prepare($check_query);
+        $check_stmt->bindParam(':email', $email);
+        $check_stmt->bindParam(':id', $user_id);
+        $check_stmt->execute();
+        
+        if ($check_stmt->rowCount() > 0) {
+            $error = 'Email đã tồn tại!';
+        } else {
+            // Cập nhật với hoặc không có password
+            if (!empty($password)) {
+                if (strlen($password) < 6) {
+                    $error = 'Mật khẩu phải có ít nhất 6 ký tự!';
+                } else {
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    $query = "UPDATE users SET fullname = :fullname, email = :email, phone = :phone, 
+                             address = :address, password = :password, role = :role, status = :status 
+                             WHERE id = :id";
+                    $stmt = $db->prepare($query);
+                    $stmt->bindParam(':password', $hashed_password);
+                }
+            } else {
+                $query = "UPDATE users SET fullname = :fullname, email = :email, phone = :phone, 
+                         address = :address, role = :role, status = :status 
+                         WHERE id = :id";
+                $stmt = $db->prepare($query);
+            }
+            
+            if (!isset($error) || empty($error)) {
+                $stmt->bindParam(':fullname', $fullname);
+                $stmt->bindParam(':email', $email);
+                $stmt->bindParam(':phone', $phone);
+                $stmt->bindParam(':address', $address);
+                $stmt->bindParam(':role', $role);
+                $stmt->bindParam(':status', $status);
+                $stmt->bindParam(':id', $user_id);
+                
+                if ($stmt->execute()) {
+                    $success = 'Cập nhật người dùng thành công!';
+                } else {
+                    $error = 'Có lỗi xảy ra!';
+                }
+            }
+        }
     }
 }
 
@@ -45,6 +140,17 @@ if (isset($_GET['delete'])) {
     } else {
         $error = 'Không thể xóa chính mình!';
     }
+}
+
+// Lấy thông tin user để edit (nếu có)
+$edit_user = null;
+if (isset($_GET['edit'])) {
+    $edit_id = (int)$_GET['edit'];
+    $query = "SELECT * FROM users WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $edit_id);
+    $stmt->execute();
+    $edit_user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 // Lọc
@@ -88,10 +194,7 @@ $total = $count_stmt->fetch(PDO::FETCH_ASSOC)['total'];
 $total_pages = ceil($total / $limit);
 
 // Lấy danh sách users
-$query = "SELECT u.*, 
-          (SELECT COUNT(*) FROM orders WHERE user_id = u.id) as order_count,
-          (SELECT SUM(total_amount) FROM orders WHERE user_id = u.id AND payment_status = 'paid') as total_spent
-          FROM users u 
+$query = "SELECT u.* FROM users u 
           $where_clause
           ORDER BY u.created_at DESC 
           LIMIT :limit OFFSET :offset";
@@ -164,23 +267,23 @@ include 'includes/admin_header.php';
     </div>
 </div>
 
-<!-- Filters -->
+<!-- Filters and Add Button -->
 <div class="admin-card mb-4">
     <div class="admin-card-body">
         <form method="GET" action="" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" name="search" class="form-control-admin" 
                        placeholder="Tìm kiếm email, tên, số điện thoại..." 
                        value="<?php echo htmlspecialchars($search); ?>">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="role" class="form-control-admin">
                     <option value="">Tất cả vai trò</option>
                     <option value="admin" <?php echo $role_filter == 'admin' ? 'selected' : ''; ?>>Quản trị viên</option>
                     <option value="user" <?php echo $role_filter == 'user' ? 'selected' : ''; ?>>Khách hàng</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="status" class="form-control-admin">
                     <option value="">Tất cả trạng thái</option>
                     <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Hoạt động</option>
@@ -190,6 +293,11 @@ include 'includes/admin_header.php';
             <div class="col-md-2">
                 <button type="submit" class="btn-admin btn-admin-primary w-100">
                     <i class="fas fa-search"></i> Lọc
+                </button>
+            </div>
+            <div class="col-md-3 text-end">
+                <button type="button" class="btn-admin btn-admin-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="fas fa-plus"></i> Thêm người dùng
                 </button>
             </div>
         </form>
@@ -208,10 +316,9 @@ include 'includes/admin_header.php';
                     <tr>
                         <th>ID</th>
                         <th>Thông tin</th>
+                        <th>Liên hệ</th>
                         <th>Vai trò</th>
                         <th>Trạng thái</th>
-                        <th>Đơn hàng</th>
-                        <th>Tổng chi</th>
                         <th>Ngày tham gia</th>
                         <th>Thao tác</th>
                     </tr>
@@ -219,7 +326,7 @@ include 'includes/admin_header.php';
                 <tbody>
                     <?php if(empty($users)): ?>
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="7" class="text-center py-5">
                                 <div class="empty-state">
                                     <i class="fas fa-users"></i>
                                     <h4>Không có người dùng</h4>
@@ -233,21 +340,30 @@ include 'includes/admin_header.php';
                                 <td><?php echo $user['id']; ?></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <?php if($user['avatar']): ?>
+                                        <?php if(!empty($user['avatar'])): ?>
                                             <img src="<?php echo htmlspecialchars($user['avatar']); ?>" 
                                                  class="rounded-circle" 
-                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                                 style="width: 40px; height: 40px; object-fit: cover;"
+                                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%23667eea\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'white\' font-size=\'16\' font-weight=\'bold\'%3E<?php echo strtoupper(substr($user['fullname'], 0, 2)); ?>%3C/text%3E%3C/svg%3E';">
                                         <?php else: ?>
                                             <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-                                                 style="width: 40px; height: 40px; font-weight: 600;">
-                                                <?php echo strtoupper(substr($user['fullname'], 0, 2)); ?>
+                                                 style="width: 40px; height: 40px; font-weight: 600; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                                <?php echo strtoupper(substr($user['fullname'] ?? 'U', 0, 2)); ?>
                                             </div>
                                         <?php endif; ?>
                                         <div>
-                                            <div><strong><?php echo htmlspecialchars($user['fullname']); ?></strong></div>
-                                            <small class="text-muted"><?php echo htmlspecialchars($user['email']); ?></small>
+                                            <div><strong><?php echo htmlspecialchars($user['fullname'] ?? 'N/A'); ?></strong></div>
+                                            <small class="text-muted"><?php echo htmlspecialchars($user['email'] ?? ''); ?></small>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <?php if(!empty($user['phone'])): ?>
+                                        <div><i class="fas fa-phone"></i> <?php echo htmlspecialchars($user['phone']); ?></div>
+                                    <?php endif; ?>
+                                    <?php if(!empty($user['address'])): ?>
+                                        <div class="text-muted small"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars(mb_substr($user['address'], 0, 30)) . (mb_strlen($user['address']) > 30 ? '...' : ''); ?></div>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <span class="badge-admin badge-<?php echo $user['role'] == 'admin' ? 'danger' : 'primary'; ?>">
@@ -258,12 +374,6 @@ include 'includes/admin_header.php';
                                     <span class="badge-admin badge-<?php echo $user['status'] == 'active' ? 'success' : 'danger'; ?>">
                                         <?php echo $user['status'] == 'active' ? 'Hoạt động' : 'Khóa'; ?>
                                     </span>
-                                </td>
-                                <td>
-                                    <span class="badge-admin badge-info"><?php echo $user['order_count']; ?> đơn</span>
-                                </td>
-                                <td>
-                                    <strong><?php echo number_format($user['total_spent'] ?? 0); ?>đ</strong>
                                 </td>
                                 <td><?php echo date('d/m/Y', strtotime($user['created_at'])); ?></td>
                                 <td>
@@ -284,28 +394,55 @@ include 'includes/admin_header.php';
                                     
                                     <!-- Edit Modal -->
                                     <div class="modal fade" id="editUserModal<?php echo $user['id']; ?>" tabindex="-1">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title">Sửa người dùng</h5>
+                                                    <h5 class="modal-title">Sửa thông tin người dùng</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <form method="POST" action="">
                                                     <div class="modal-body">
                                                         <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                                        <div class="form-group-admin mb-3">
-                                                            <label class="form-label-admin">Vai trò</label>
-                                                            <select name="role" class="form-control-admin" required>
-                                                                <option value="user" <?php echo $user['role'] == 'user' ? 'selected' : ''; ?>>Khách hàng</option>
-                                                                <option value="admin" <?php echo $user['role'] == 'admin' ? 'selected' : ''; ?>>Quản trị viên</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group-admin">
-                                                            <label class="form-label-admin">Trạng thái</label>
-                                                            <select name="status" class="form-control-admin" required>
-                                                                <option value="active" <?php echo $user['status'] == 'active' ? 'selected' : ''; ?>>Hoạt động</option>
-                                                                <option value="inactive" <?php echo $user['status'] == 'inactive' ? 'selected' : ''; ?>>Không hoạt động</option>
-                                                            </select>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label-admin">Họ và tên <span class="text-danger">*</span></label>
+                                                                <input type="text" name="fullname" class="form-control-admin" 
+                                                                       value="<?php echo htmlspecialchars($user['fullname'] ?? ''); ?>" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label-admin">Email <span class="text-danger">*</span></label>
+                                                                <input type="email" name="email" class="form-control-admin" 
+                                                                       value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label-admin">Số điện thoại</label>
+                                                                <input type="text" name="phone" class="form-control-admin" 
+                                                                       value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>">
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label-admin">Mật khẩu mới (để trống nếu không đổi)</label>
+                                                                <input type="password" name="password" class="form-control-admin" 
+                                                                       placeholder="Nhập mật khẩu mới...">
+                                                                <small class="text-muted">Tối thiểu 6 ký tự</small>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label-admin">Vai trò <span class="text-danger">*</span></label>
+                                                                <select name="role" class="form-control-admin" required>
+                                                                    <option value="user" <?php echo ($user['role'] ?? 'user') == 'user' ? 'selected' : ''; ?>>Khách hàng</option>
+                                                                    <option value="admin" <?php echo ($user['role'] ?? 'user') == 'admin' ? 'selected' : ''; ?>>Quản trị viên</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label-admin">Trạng thái <span class="text-danger">*</span></label>
+                                                                <select name="status" class="form-control-admin" required>
+                                                                    <option value="active" <?php echo ($user['status'] ?? 'active') == 'active' ? 'selected' : ''; ?>>Hoạt động</option>
+                                                                    <option value="inactive" <?php echo ($user['status'] ?? 'active') == 'inactive' ? 'selected' : ''; ?>>Không hoạt động</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label class="form-label-admin">Địa chỉ</label>
+                                                                <textarea name="address" class="form-control-admin" rows="2"><?php echo htmlspecialchars($user['address'] ?? ''); ?></textarea>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -338,5 +475,61 @@ include 'includes/admin_header.php';
     </div>
 </div>
 
-<?php include 'includes/admin_footer.php'; ?>
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm người dùng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-admin">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" name="fullname" class="form-control-admin" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-admin">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control-admin" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-admin">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control-admin" required minlength="6">
+                            <small class="text-muted">Tối thiểu 6 ký tự</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-admin">Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control-admin">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-admin">Vai trò <span class="text-danger">*</span></label>
+                            <select name="role" class="form-control-admin" required>
+                                <option value="user">Khách hàng</option>
+                                <option value="admin">Quản trị viên</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-admin">Trạng thái <span class="text-danger">*</span></label>
+                            <select name="status" class="form-control-admin" required>
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Không hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label-admin">Địa chỉ</label>
+                            <textarea name="address" class="form-control-admin" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin" style="background: #e2e8f0; color: var(--admin-text);" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" name="add_user" class="btn-admin btn-admin-success">Thêm người dùng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+<?php include 'includes/admin_footer.php'; ?>

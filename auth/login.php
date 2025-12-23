@@ -90,7 +90,7 @@ $savedEmail = isset($_COOKIE['user_email']) ? $_COOKIE['user_email'] : '';
 
 // Background image URL - dùng đường dẫn tương đối từ file login.php
 // Vì login.php nằm trong thư mục auth/, nên cần dùng ../ để lên root
-$bgImageUrl = '../assets/images/15.jpg';
+$bgImageUrl = '../assets/images/18.mp4';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -103,15 +103,152 @@ $bgImageUrl = '../assets/images/15.jpg';
     <link rel="stylesheet" href="../assets/css/auth.css">
     <style>
         .auth-container {
-            background-image: url('../assets/images/15.jpg') !important;
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-container::before {
+            background: rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        .auth-video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+        
+        .auth-card {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.25) !important;
+            backdrop-filter: blur(15px) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                        0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        .auth-card-body {
+            background: transparent !important;
+        }
+        
+        .auth-card-header {
+            background: rgba(99, 102, 241, 0.4) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        
+        .form-control {
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(5px) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            color: #1e293b !important;
+        }
+        
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border-color: rgba(99, 102, 241, 0.8) !important;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(30, 41, 59, 0.6) !important;
+        }
+        
+        .form-label {
+            color: rgba(255, 255, 255, 0.95) !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .btn-google {
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(5px) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .btn-google:hover {
+            background: rgba(255, 255, 255, 0.85) !important;
+        }
+        
+        .alert {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        
+        .auth-footer {
+            color: rgba(255, 255, 255, 0.9) !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .auth-link {
+            color: rgba(255, 255, 255, 0.95) !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .auth-divider {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .auth-divider::before,
+        .auth-divider::after {
+            border-color: rgba(255, 255, 255, 0.4) !important;
+        }
+        
+        .form-check-label {
+            color: rgba(255, 255, 255, 0.95) !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .video-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .video-control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .video-control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .video-control-btn i {
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-<div class="auth-container" style="background-image: url('../assets/images/15.jpg'); background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;">
+<div class="auth-container">
+    <video class="auth-video-background" id="backgroundVideo" autoplay loop playsinline>
+        <source src="../assets/images/18.mp4" type="video/mp4">
+        Trình duyệt của bạn không hỗ trợ video.
+    </video>
+    
+    <div class="video-controls">
+        <button class="video-control-btn" id="playPauseBtn" title="Phát/Tạm dừng">
+            <i class="fas fa-pause"></i>
+        </button>
+        <button class="video-control-btn" id="muteUnmuteBtn" title="Bật/Tắt âm thanh">
+            <i class="fas fa-volume-up"></i>
+        </button>
+    </div>
+    
     <div class="auth-card">
         <div class="auth-card-header">
             <div class="auth-icon">
@@ -211,6 +348,81 @@ function togglePassword(inputId) {
         toggle.classList.add('fa-eye');
     }
 }
+
+// Video controls
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('backgroundVideo');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const muteUnmuteBtn = document.getElementById('muteUnmuteBtn');
+    
+    if (video && playPauseBtn && muteUnmuteBtn) {
+        // Play/Pause button
+        playPauseBtn.addEventListener('click', function() {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                video.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        });
+        
+        // Mute/Unmute button
+        muteUnmuteBtn.addEventListener('click', function() {
+            if (video.muted) {
+                video.muted = false;
+                muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            } else {
+                video.muted = true;
+                muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            }
+        });
+        
+        // Update button icons based on video state
+        video.addEventListener('play', function() {
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        });
+        
+        video.addEventListener('pause', function() {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+        
+        video.addEventListener('volumechange', function() {
+            if (video.muted) {
+                muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+                muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+        });
+        
+        // Tự động bật âm thanh
+        video.muted = false;
+        muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+        
+        // Thử phát video với âm thanh
+        video.play().then(function() {
+            video.muted = false;
+            muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+        }).catch(function(error) {
+            console.log('Autoplay with sound prevented:', error);
+            // Nếu bị chặn, thử bật âm thanh khi user tương tác
+            const enableSound = function() {
+                video.muted = false;
+                muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                document.removeEventListener('click', enableSound);
+                document.removeEventListener('touchstart', enableSound);
+            };
+            document.addEventListener('click', enableSound, { once: true });
+            document.addEventListener('touchstart', enableSound, { once: true });
+        });
+        
+        // Đảm bảo âm thanh luôn bật khi video có thể phát
+        video.addEventListener('canplay', function() {
+            video.muted = false;
+            muteUnmuteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+        });
+    }
+});
 
 // Form loading state
 document.getElementById('loginForm').addEventListener('submit', function(e) {

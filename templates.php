@@ -90,9 +90,9 @@ include 'includes/header.php';
     <!-- Templates Grid -->
     <div class="row g-4" id="templatesGrid">
         <?php
-        // Lấy templates từ database
+        // Lấy templates từ database - ORDER BY updated_at để hiển thị mới cập nhật trước
         try {
-            $templates_query = "SELECT * FROM templates WHERE status = 'active' ORDER BY featured DESC, created_at DESC";
+            $templates_query = "SELECT * FROM templates WHERE status = 'active' ORDER BY featured DESC, updated_at DESC, created_at DESC";
             $stmt = $db->prepare($templates_query);
             $stmt->execute();
             $templates = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -130,17 +130,17 @@ include 'includes/header.php';
         <div class="col-md-6 col-lg-4 template-item" data-category="<?php echo $template_category; ?>">
             <div class="template-card">
                 <div class="template-image">
-                    <?php if ($template['image']): ?>
-                        <?php 
-                        // Kiểm tra nếu là URL đầy đủ hoặc chỉ là tên file
-                        $image_url = $template['image'];
-                        if (!preg_match('/^https?:\/\//', $image_url) && !preg_match('/^\//', $image_url)) {
-                            $image_url = SITE_URL . '/uploads/templates/' . $image_url;
-                        }
-                        ?>
+                    <?php 
+                    // Sử dụng helper function để build URL ảnh
+                    $image_url = buildTemplateImageUrl($template['image'] ?? '', true); // true = thêm cache busting
+                    
+                    if ($image_url): 
+                    ?>
                         <img src="<?php echo htmlspecialchars($image_url); ?>" 
                              alt="<?php echo htmlspecialchars($template['name']); ?>"
-                             style="width: 100%; height: 100%; object-fit: cover;">
+                             style="width: 100%; height: 100%; object-fit: cover;"
+                             loading="lazy"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'placeholder-template\' style=\'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;\'><i class=\'fas fa-laptop fa-5x text-white opacity-50\'></i></div>';">
                     <?php else: ?>
                         <div class="placeholder-template" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                             <i class="fas fa-laptop fa-5x text-white opacity-50"></i>
@@ -192,17 +192,17 @@ include 'includes/header.php';
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <?php if ($template['image']): ?>
-                                    <?php 
-                                    // Kiểm tra nếu là URL đầy đủ hoặc chỉ là tên file
-                                    $image_url = $template['image'];
-                                    if (!preg_match('/^https?:\/\//', $image_url) && !preg_match('/^\//', $image_url)) {
-                                        $image_url = SITE_URL . '/uploads/templates/' . $image_url;
-                                    }
-                                    ?>
-                                    <img src="<?php echo htmlspecialchars($image_url); ?>" 
+                                <?php 
+                                // Sử dụng helper function để build URL ảnh
+                                $modal_image_url = buildTemplateImageUrl($template['image'] ?? '', true); // true = thêm cache busting
+                                
+                                if ($modal_image_url): 
+                                ?>
+                                    <img src="<?php echo htmlspecialchars($modal_image_url); ?>" 
                                          alt="<?php echo htmlspecialchars($template['name']); ?>"
-                                         class="img-fluid rounded shadow">
+                                         class="img-fluid rounded shadow"
+                                         loading="lazy"
+                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-light rounded d-flex align-items-center justify-content-center\' style=\'height: 400px;\'><div class=\'text-center\'><i class=\'fas fa-desktop fa-5x text-muted mb-3\'></i><p class=\'text-muted\'>Hình ảnh mẫu giao diện</p></div></div>';">
                                 <?php else: ?>
                                     <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
                                         <div class="text-center">

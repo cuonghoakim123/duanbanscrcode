@@ -135,6 +135,7 @@ include 'includes/header.php';
                             <span class="skill-tag">Vue.js</span>
                             <span class="skill-tag">WordPress</span>
                             <span class="skill-tag">Bootstrap</span>
+
                             
                         </div>
                     </div>
@@ -146,17 +147,25 @@ include 'includes/header.php';
                             <span class="skill-tag">Python</span>
                             <span class="skill-tag">Java</span>
                             <span class="skill-tag">C#</span>
+
          
                             <span class="skill-tag">Laravel</span>
                             <span class="skill-tag">MySQL</span>
                             <span class="skill-tag">MongoDB</span>
                             <span class="skill-tag">PostgreSQL</span>
+                            
                         </div>
                     </div>
                     <div class="skill-category">
                         <h5><i class="fas fa-mobile-alt"></i> Mobile Development</h5>
                         <div class="skill-tags">
                             <span class="skill-tag">Flutter</span>
+                            <span class="skill-tag">Java </span>
+                            <span class="skill-tag">Kotlin</span>
+                            <span class="skill-tag">Mobile App Development</span>
+                            <span class="skill-tag">React Native</span>
+                            <span class="skill-tag">UI/UX Knowledge</span>
+
                         </div>
                     </div>
                     <div class="skill-category">
@@ -164,6 +173,10 @@ include 'includes/header.php';
                         <div class="skill-tags">
                             <span class="skill-tag">Git/GitHub</span>
                             <span class="skill-tag">VS Code</span>
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">Cursor</span>
+                            <span class="skill-tag">Figma</span>
+
                         </div>
                     </div>
                 </div>
